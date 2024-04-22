@@ -49,7 +49,7 @@ def Main():
 
         for event in pyg.event.get():
             Globals.mouse_position[0] = pyg.mouse.get_pos()[0] * (Globals.WIDTH / Globals.WINDOW_WIDTH)
-            Globals.mouse_position[1] = pyg.mouse.get_pos()[1] * (Globals.WIDTH / Globals.WINDOW_WIDTH)
+            Globals.mouse_position[1] = pyg.mouse.get_pos()[1] * (Globals.HEIGHT / Globals.WINDOW_HEIGHT)
             if event.type == pyg.QUIT:
                 pyg.quit()
                 sys.exit()
@@ -74,6 +74,7 @@ def Main():
 
             elif event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
                 active_field = None
+                print(Globals.mouse_position)
                 
                 for field in fields:
                     if field.check_mcollision() and field != related_input:

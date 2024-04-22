@@ -48,7 +48,8 @@ def Main():
         desc_offset = max(10, (len(text_lines)-1) * description_input.font.size("A")[1] + 10)
 
         for event in pyg.event.get():
-            Globals.mouse_position = pyg.mouse.get_pos()
+            Globals.mouse_position[0] = pyg.mouse.get_pos()[0] * (Globals.WIDTH / Globals.WINDOW_WIDTH)
+            Globals.mouse_position[1] = pyg.mouse.get_pos()[1] * (Globals.WIDTH / Globals.WINDOW_WIDTH)
             if event.type == pyg.QUIT:
                 pyg.quit()
                 sys.exit()

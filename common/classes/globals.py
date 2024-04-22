@@ -17,7 +17,7 @@ class Globals:
     clock = pyg.time.Clock()
 
     # Current position of mouse cursor
-    mouse_position = (0, 0)
+    mouse_position = [0, 0]
 
     cursor_position = 0
     cursor_period = 1.2 * FPS

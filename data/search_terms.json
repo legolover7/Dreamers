@@ -1,0 +1,35 @@
+{
+    "terms": [
+        {
+            "keyword": "Chase",
+            "description": "The act of chasing",
+            "related_terms": [
+                ""
+            ],
+            "is_verb": true,
+            "is_noun": false
+        },
+        {
+            "keyword": "Aardvark",
+            "description": "It's an animal",
+            "related_terms": [
+                "animal",
+                "food"
+            ],
+            "is_verb": true,
+            "is_noun": true
+        },
+        {
+            "keyword": "Adrift",
+            "description": "When you are doing the float",
+            "related_terms": [
+                "Swimming"
+            ],
+            "categories": [
+                "Cars"
+            ],
+            "is_verb": false,
+            "is_noun": false
+        }
+    ]
+}

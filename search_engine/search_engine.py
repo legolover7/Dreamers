@@ -6,6 +6,7 @@ from common.classes.globals import Globals
 
 import search_engine.modules.draw as draw
 import search_engine.modules.search_view as search_view
+from search_engine.modules.tabpanel import Tab
 
 def Main():
     # Initialize window
@@ -18,6 +19,9 @@ def Main():
     os.system("cls")
 
     search_view.update_search()
+
+    panel_tabs = [Tab((Globals.WIDTH/2+52, 0, 75, 30), "Search"), Tab((Globals.WIDTH/2+125, 0, 120, 30), "Definition")]
+    panel_tabs[0].active = True
 
     while True:
         # Get events
@@ -37,7 +41,17 @@ def Main():
                     pyg.quit()
                     sys.exit()
 
-        draw.draw()
+            elif event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
+                clicked_tab = None
+                for tab in panel_tabs:
+                    if tab.check_mcollision():
+                        clicked_tab = tab
+
+                if clicked_tab != None:
+                    for tab in panel_tabs:
+                        tab.active = clicked_tab == tab
+
+        draw.draw(panel_tabs)
         Globals.clock.tick(Globals.FPS)
 
 

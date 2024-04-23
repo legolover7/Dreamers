@@ -14,29 +14,32 @@ import common.modules.typing_handler as typing_handler
 import common.modules.chunk_text as chunk_text
 import editor.modules.draw as draw
 
-# Initialize window
-pyg.init()
-info_object = pyg.display.Info()
-Globals.WIDTH, Globals.HEIGHT = (1920, 1080)
-Globals.WINDOW_WIDTH, Globals.WINDOW_HEIGHT = info_object.current_w, info_object.current_h
-Globals.WINDOW = pyg.display.set_mode((Globals.WINDOW_WIDTH, Globals.WINDOW_HEIGHT))
-pyg.display.set_caption("Texting App")
-os.system("cls")
-
 def Main():
-    keyword_input = InputField((600, 140, 300, 30), Fonts.font_20, "Enter Keyword", title="Keyword(s)", title_font=Fonts.font_24)
+    # Initialize window
+    pyg.init()
+    info_object = pyg.display.Info()
+    Globals.WIDTH, Globals.HEIGHT = (1920, 1080)
+    Globals.WINDOW_WIDTH, Globals.WINDOW_HEIGHT = info_object.current_w, info_object.current_h
+    Globals.WINDOW = pyg.display.set_mode((Globals.WINDOW_WIDTH, Globals.WINDOW_HEIGHT))
+    pyg.display.set_caption("Texting App")
+    os.system("cls")
+
+    # Various buttons and fields
+    keyword_input = InputField((600, 150, 400, 30), Fonts.font_20, "Enter Keyword", title="Keyword(s)", title_font=Fonts.font_24)
+    page_input = InputField((1100, 150, 220, 30), Fonts.font_20, "Enter Page Number", title="Page Number", title_font=Fonts.font_24)
     description_input = InputField((600, 250, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Description", title="Description", title_font=Fonts.font_24)
     related_input = InputField((600, 350, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Terms", title="Related Search Terms", title_font=Fonts.font_24)
     category_input = InputField((600, 450, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Categories", title="Categories", title_font=Fonts.font_24)
-    links_input = InputField((600, 550, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Links", title="Links", title_font=Fonts.font_24)
+    links_input = InputField((600, 550, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Links", title="Links to Definition of", title_font=Fonts.font_24)
+    ref_input = InputField((600, 650, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter References", title="References", title_font=Fonts.font_24)
 
-    verb_box = Checkbox((1000, 144, 20, 20), "Verb", Fonts.font_20)
-    noun_box = Checkbox((1100, 144, 20, 20), "Noun", Fonts.font_20)
-    adjective_box = Checkbox((1250, 144, 20, 20), "Adjective", Fonts.font_20)
+    verb_box = Checkbox((650, 710, 20, 20), "Verb", Fonts.font_20)
+    noun_box = Checkbox((750, 710, 20, 20), "Noun", Fonts.font_20)
+    adjective_box = Checkbox((900, 710, 20, 20), "Adjective", Fonts.font_20)
 
     save_button = Button((Globals.WIDTH/2-100, Globals.HEIGHT-100, 200, 40), Colors.blue, "Save", Fonts.font_24, Colors.white)
 
-    fields = [keyword_input, description_input, related_input, category_input, links_input]
+    fields = [keyword_input, page_input, description_input, related_input, category_input, links_input, ref_input]
     boxes = [verb_box, noun_box, adjective_box]
     buttons = [save_button]
     active_field = None
@@ -74,7 +77,6 @@ def Main():
 
             elif event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
                 active_field = None
-                print(Globals.mouse_position)
                 
                 for field in fields:
                     if field.check_mcollision() and field != related_input:
@@ -107,19 +109,21 @@ def Main():
         Globals.cursor_frame = min(Globals.cursor_timeout * Globals.FPS + 1, Globals.cursor_frame + 1)
         error_timeout = max(0, error_timeout - 1)
 
-        draw.draw(fields, boxes, buttons, active_field, desc_offset, related_input, category_input, error_message, error_timeout)
+        draw.draw(fields, boxes, buttons, active_field, desc_offset, error_message, error_timeout)
         Globals.clock.tick(Globals.FPS)
 
 def SaveWord(fields, boxes):
-    keyword_input, description_input, related_input, category_input, links_input = fields
+    keyword_input, page_input, description_input, related_input, category_input, links_input, ref_input = fields
     verb_box, noun_box, adjective_box = boxes
 
     if keyword_input.text == "":
         return "No keyword"
 
-    related = related_input.text.split(",")
-    categories = category_input.text.split(",")
-    links = links_input.text.split(",")
+    # Split certain fields into a list
+    related = related_input.text.split(",") if related_input.text != "" else []
+    categories = category_input.text.split(",") if category_input.text != "" else []
+    links = links_input.text.split(",") if links_input.text != "" else []
+    references = ref_input.text.split(",") if ref_input.text != "" else []
 
     for i in range(len(related)):
         related[i] = related[i].strip()
@@ -130,14 +134,20 @@ def SaveWord(fields, boxes):
     for i in range(len(links)):
         links[i] = links[i].strip()
 
+    for i in range(len(references)):
+        references[i] = references[i].strip()
+
     object = {
         "keyword": keyword_input.text,
+        "page_number": page_input.text,
         "description": description_input.text,
         "related_terms": related,
         "categories": categories,
+        "links": links,
+        "references": references,
         "is_verb": verb_box.active,
         "is_noun": noun_box.active,
-        "is_adjective": adjective_box.active
+        "is_adjective": adjective_box.active,
     }
 
     data = ""

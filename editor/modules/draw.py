@@ -5,20 +5,21 @@ pyg.font.init()
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
 
-def draw(fields, boxes, buttons, active_field, desc_offset, related_input, category_input, error_message, error_timeout):
+def draw(fields, boxes, buttons, active_field, desc_offset, error_message, error_timeout):
     VID_BUFFER = Globals.VID_BUFFER
     WIDTH, HEIGHT = Globals.WIDTH, Globals.HEIGHT
 
     VID_BUFFER.fill(Colors.black)
 
-    for field in fields:
-        if field == related_input or field == category_input:
+    for i in range(len(fields)):
+        field = fields[i]
+        if i > 2:
             field.draw(active_field, desc_offset)
         else:
             field.draw(active_field)
 
     for box in boxes:
-        box.draw()
+        box.draw(desc_offset)
 
     for button in buttons:
         button.draw()

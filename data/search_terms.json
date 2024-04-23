@@ -3,9 +3,7 @@
         {
             "keyword": "Chase",
             "description": "The act of chasing",
-            "related_terms": [
-                ""
-            ],
+            "related_terms": [],
             "is_verb": true,
             "is_noun": false
         },

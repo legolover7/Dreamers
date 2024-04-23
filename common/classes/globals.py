@@ -23,3 +23,5 @@ class Globals:
     cursor_period = 1.2 * FPS
     cursor_timeout = 5 * cursor_period
     cursor_frame = 0 
+
+    MAX_RETURN_NUMBER = 20

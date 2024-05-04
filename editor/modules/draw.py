@@ -19,7 +19,7 @@ def draw(fields, boxes, buttons, active_field, desc_offset, error_message, error
             field.draw(active_field)
 
     for box in boxes:
-        box.draw(desc_offset)
+        box.draw(VID_BUFFER, desc_offset)
 
     for button in buttons:
         button.draw()

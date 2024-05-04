@@ -5,7 +5,7 @@ from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
 
 from common.classes.buttons import Button
-from components.tab_control.tab_components import Tab, DefinitionView, SearchView
+from components.tab_control.tab_components import Tab, DefinitionView, SearchView, SettingsView
 
 class TabContainer:
     def __init__(self, tabs: list[Tab]):
@@ -19,6 +19,7 @@ class TabContainer:
         # Tabcontainer components
         self.definition_view = DefinitionView()
         self.search_view = SearchView((Globals.WIDTH/2+50, 50))
+        self.settings_view = SettingsView((Globals.WIDTH/2+50, 50))
 
     def draw(self, window, offset):
         """Draws the current tab view: search tab, description, etc."""
@@ -47,6 +48,9 @@ class TabContainer:
 
         elif self.view == "Search":
             self.search_view.draw(window)
+
+        elif self.view == "Settings":
+            self.settings_view.draw(window)
 
     def update_view(self, option):
         """Selects one of this object's tabs based on the option provided"""

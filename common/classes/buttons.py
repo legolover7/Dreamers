@@ -28,22 +28,35 @@ class Button:
         return collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
     
 class Checkbox:
-    def __init__(self, rect, text, font):
+    def __init__(self, rect, text, font, default_active=False, right_align=False):
         self.x, self.y, self.width, self.height = rect
         self.text = text
         self.font = font
-        self.active = False
+        self.active = default_active
+        self.right_align = right_align
     
-    def draw(self, offset=0):
+    def draw(self, window, offset=0):
         color = Colors.green if self.active else Colors.gray
-        pyg.draw.rect(Globals.VID_BUFFER, Colors.gray, (self.x-1, self.y-1 + offset, self.width+2, self.height+2), border_radius=2)
-        pyg.draw.rect(Globals.VID_BUFFER, color, (self.x, self.y + offset, self.width, self.height), border_radius=2)
+        if self.right_align:
+            text_width = self.font.size(self.text)[0]
+            window.blit(self.font.render(self.text, True, Colors.white), (self.x, self.y + offset))
 
-        text_width = self.font.size(self.text)[0]
-        Globals.VID_BUFFER.blit(self.font.render(self.text, True, Colors.white), (self.x - text_width -6, self.y + offset))
+            pyg.draw.rect(window, Colors.gray, (self.x + text_width + 9, self.y - 1 + offset, self.width+2, self.height+2), border_radius=2)
+            pyg.draw.rect(window, color, (self.x + text_width + 10, self.y + offset, self.width, self.height), border_radius=2)
+        else:
+            pyg.draw.rect(window, Colors.gray, (self.x-1, self.y-1 + offset, self.width+2, self.height+2), border_radius=2)
+            pyg.draw.rect(window, color, (self.x, self.y + offset, self.width, self.height), border_radius=2)
+
+            text_width = self.font.size(self.text)[0]
+            window.blit(self.font.render(self.text, True, Colors.white), (self.x - text_width -6, self.y + offset))
 
     def check_mcollision(self, offset=0):
-        return collides_point(Globals.mouse_position, (self.x, self.y + offset, self.width, self.height))
+        if self.right_align:
+            text_width = self.font.size(self.text)[0]
+            return collides_point(Globals.mouse_position, (self.x + text_width + 10, self.y + offset, self.width, self.height))
+
+        else:
+            return collides_point(Globals.mouse_position, (self.x, self.y + offset, self.width, self.height))
 
 class Dropdown:
     def __init__(self, rect, font, color, options, text_color):

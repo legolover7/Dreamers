@@ -1,4 +1,6 @@
 # Import statements
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 import pygame as pyg
 import json
 import sys
@@ -38,10 +40,11 @@ def Main():
     adjective_box = Checkbox((900, 710, 20, 20), "Adjective", Fonts.font_20)
 
     save_button = Button((Globals.WIDTH/2-100, Globals.HEIGHT-100, 200, 40), Colors.blue, "Save", Fonts.font_24, Colors.white)
+    merge_button = Button((20, 20, 150, 30), Colors.aqua, "Merge Files", Fonts.font_24, Colors.black)
 
     fields = [keyword_input, page_input, description_input, related_input, category_input, links_input, ref_input]
     boxes = [verb_box, noun_box, adjective_box]
-    buttons = [save_button]
+    buttons = [save_button, merge_button]
     active_field = None
     error_message = ""
     error_timeout = 0
@@ -70,6 +73,7 @@ def Main():
                     active_field = None
 
                 elif key == pyg.K_RETURN:
+                    # Save fields to file
                     response = SaveWord(fields, boxes)
                     if response == "Saved":
                         for field in fields:
@@ -91,6 +95,7 @@ def Main():
             elif event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
                 active_field = None
                 
+                # Select a field
                 for i in range(len(fields)):
                     if i > 2:
                         if fields[i].check_mcollision(desc_offset):
@@ -107,6 +112,7 @@ def Main():
                     if box.check_mcollision(desc_offset):
                         box.active = not box.active
 
+                # Save fields to file
                 if save_button.check_mcollision():
                     response = SaveWord(fields, boxes)
                     if response == "Saved":
@@ -120,6 +126,20 @@ def Main():
                         error_message = response
                         error_timeout = Globals.FPS * 3
 
+                # Merge data files
+                if merge_button.check_mcollision():
+                    filename = askopenfilename()
+                    outdata = {}
+                    with open("data/search_terms.json", "r") as outfile, open(filename, "r") as infile:
+                        outdata = json.load(outfile)
+                        indata = json.load(infile)
+                        for item in indata["terms"]:
+                            if item not in outdata["terms"]:
+                                outdata["terms"] += [item]
+
+                    with open("data/search_terms.json", "w") as file:
+                        file.write(json.dumps(outdata, indent=4))              
+                        
         Globals.cursor_frame = min(Globals.cursor_timeout * Globals.FPS + 1, Globals.cursor_frame + 1)
         error_timeout = max(0, error_timeout - 1)
 

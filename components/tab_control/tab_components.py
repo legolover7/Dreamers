@@ -1,6 +1,7 @@
 import pygame as pyg
 import copy
 
+from common.classes.buttons import Checkbox
 from common.classes.input_field import InputField
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
@@ -221,3 +222,19 @@ class SearchView:
 
             if collides_point(Globals.mouse_position, (self.x + 50, self.y + 129 + i * (char_height + 2), self.width - 100, char_height + 2)):
                 return index
+            
+class SettingsView:
+    def __init__(self, position):
+        self.x, self.y = position
+        self.width, self.height = Globals.WIDTH - self.x, Globals.HEIGHT - 50
+
+        # Settings!
+        self.boxes = {
+            "show_fps": Checkbox((self.x + 20, self.y + 20, 20, 20), "Show FPS", Fonts.font_20, right_align=True),
+            "save_history": Checkbox((self.x + 20, self.y + 50, 20, 20), "Save Search History", Fonts.font_20, True, right_align=True)
+        }
+
+    def draw(self, window):
+        """Draws the settings view component"""
+        for box in self.boxes.keys():
+            self.boxes[box].draw(window)

@@ -19,6 +19,9 @@ def handler(content, key, key_mods, cursor):
     if 44 <= key <= 57:
         char = "<->?)!@#$%^&*("[key-44] if shift else ",_./0123456789"[key-44]
         cursor += 1
+    if 1073741913 <= key <= 1073741922:
+        char = "1234567890"[key-1073741913] 
+        cursor += 1
 
     if key == 39:
         char = "\"" if shift else "'"

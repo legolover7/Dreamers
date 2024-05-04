@@ -1,33 +1,511 @@
 {
     "terms": [
         {
-            "keyword": "Chase",
-            "description": "The act of chasing",
-            "related_terms": [],
-            "is_verb": true,
-            "is_noun": false
-        },
-        {
-            "keyword": "Aardvark",
-            "description": "It's an animal",
+            "keyword": "Zebra",
+            "page_number": "592",
+            "description": "(1) Africa; (2) double_mindedness (black and white); (3) lukewarm and in the world (horse: neither black nor white).",
             "related_terms": [
-                "animal",
-                "food"
-            ],
-            "is_verb": true,
-            "is_noun": true
-        },
-        {
-            "keyword": "Adrift",
-            "description": "When you are doing the float",
-            "related_terms": [
-                "Swimming"
+                "horse",
+                "black",
+                "white"
             ],
             "categories": [
-                "Cars"
+                "animal"
+            ],
+            "links": [
+                "horse"
+            ],
+            "references": [
+                "(1) country of origin; (2) Matt 5:36-37; (3) Rev. 3:16"
             ],
             "is_verb": false,
-            "is_noun": false
+            "is_noun": true,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Youth",
+            "page_number": "592",
+            "description": "(1) Redeemed individual; (2) young person.",
+            "related_terms": [
+                "teenager",
+                "younger"
+            ],
+            "categories": [
+                "people"
+            ],
+            "links": [
+                "teenager",
+                "younger"
+            ],
+            "references": [
+                "(1) Job 33:23-25",
+                "Ps. 103:3-5"
+            ],
+            "is_verb": false,
+            "is_noun": true,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Youth hostel",
+            "page_number": "592",
+            "description": "(1) Vibrant young church.",
+            "related_terms": [
+                "backpackers hostel"
+            ],
+            "categories": [
+                "place"
+            ],
+            "links": [],
+            "references": [
+                "(1) 1 John 2:13-14"
+            ],
+            "is_verb": false,
+            "is_noun": true,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Y-junction",
+            "page_number": "",
+            "description": "",
+            "related_terms": [],
+            "categories": [
+                "cars/driving related"
+            ],
+            "links": [
+                "T-junction"
+            ],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zorka",
+            "page_number": "653",
+            "description": "Star of the morning",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zoran",
+            "page_number": "653",
+            "description": "Daybreak; dawn",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zephaniah",
+            "page_number": "653",
+            "description": "Spiritual Life",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "Biblical character"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zeena",
+            "page_number": "653",
+            "description": "A woman; feminine",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zeeb",
+            "page_number": "653",
+            "description": "A wolf",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zedekiah",
+            "page_number": "653",
+            "description": "God is impartial; justice of Jehovah",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "biblical character"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zechariah",
+            "page_number": "653",
+            "description": "The Lord has remembered",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "biblical character"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zebulun",
+            "page_number": "653",
+            "description": "Dwelling",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "biblical character",
+                "place"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zara",
+            "page_number": "653",
+            "description": "Daybreak",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zane",
+            "page_number": "653",
+            "description": "God has favored",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zam Zam",
+            "page_number": "653",
+            "description": "Well of Mecca; Spring of Islam",
+            "related_terms": [],
+            "categories": [
+                "place",
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zachary",
+            "page_number": "653",
+            "description": "God has remembered",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Zac",
+            "page_number": "653",
+            "description": "Remember; past",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yvonne",
+            "page_number": "653",
+            "description": "Bowman or archer",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yukimura",
+            "page_number": "653",
+            "description": "Snowy village",
+            "related_terms": [],
+            "categories": [
+                "place",
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yshua",
+            "page_number": "653",
+            "description": "God is Savior",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "biblical character"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yo-yo",
+            "page_number": "592",
+            "description": "Something/issue that goes away and comes back again; idle hands",
+            "related_terms": [
+                "toy"
+            ],
+            "categories": [],
+            "links": [],
+            "references": [
+                "(1) Prov.26:11; (2) Eccl. 10:18"
+            ],
+            "is_verb": false,
+            "is_noun": true,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yorke/Yorkie",
+            "page_number": "653",
+            "description": "Wild pig farm",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "place"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "York",
+            "page_number": "652",
+            "description": "From the area of the yew trees; boar settlement",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "place"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yisrael",
+            "page_number": "652",
+            "description": "Rules with God",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "place",
+                "biblical character"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yasmin",
+            "page_number": "652",
+            "description": "Fragrant shrub",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yana",
+            "page_number": "652",
+            "description": "God has favored; a bear",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [
+                "Slavic; American Indian"
+            ],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yan",
+            "page_number": "652",
+            "description": "God has favored",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yamamoto",
+            "page_number": "652",
+            "description": "Base of the mountain",
+            "related_terms": [],
+            "categories": [
+                "place",
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yamada",
+            "page_number": "652",
+            "description": "Mountain rice field",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "place"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yale",
+            "page_number": "652",
+            "description": "Fertile high ground",
+            "related_terms": [],
+            "categories": [
+                "name",
+                "place"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Yago",
+            "page_number": "652",
+            "description": "",
+            "related_terms": [],
+            "categories": [
+                "name"
+            ],
+            "links": [
+                "Jacob"
+            ],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Wyoming",
+            "page_number": "652",
+            "description": "Extensive plains; mountains and valleys alternating",
+            "related_terms": [],
+            "categories": [
+                "place",
+                "name"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
+        },
+        {
+            "keyword": "Woolworths",
+            "page_number": "652",
+            "description": "Sheep enclosure; sheep farm",
+            "related_terms": [],
+            "categories": [
+                "place"
+            ],
+            "links": [],
+            "references": [],
+            "is_verb": false,
+            "is_noun": false,
+            "is_adjective": false
         }
     ]
 }

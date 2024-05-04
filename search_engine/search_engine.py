@@ -2,11 +2,14 @@ import pygame as pyg
 import sys
 import os
 
+from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
+from common.modules.profiler import Profiler
 
 import search_engine.modules.draw as draw
-import search_engine.modules.search_view as search_view
-from search_engine.modules.tabpanel import Tab
+from search_engine.modules.search_view import SearchView
+from components.tab_control.tab_container import TabContainer
+from components.tab_control.tab_components import Tab
 
 def Main():
     # Initialize window
@@ -18,12 +21,16 @@ def Main():
     pyg.display.set_caption("Texting App")
     os.system("cls")
 
+    search_view = SearchView()
     search_view.update_search()
 
-    panel_tabs = [Tab((Globals.WIDTH/2+52, 0, 75, 30), "Search"), Tab((Globals.WIDTH/2+125, 0, 120, 30), "Definition")]
-    panel_tabs[0].active = True
+    profiler = Profiler(Globals.FPS, (Globals.WIDTH - 30, 4), Fonts.font_20, Colors.white)
+    
+    tab_view = TabContainer([Tab((Globals.WIDTH/2+52, 0, 75, 30), "Search"), Tab((Globals.WIDTH/2+125, 0, 120, 30), "Definition")])
 
     while True:
+        profiler.calc_frame()
+
         # Get events
         for event in pyg.event.get():
             Globals.mouse_position = pyg.mouse.get_pos()
@@ -41,17 +48,25 @@ def Main():
                     pyg.quit()
                     sys.exit()
 
+                if key == pyg.K_F9:
+                    profiler.display = not profiler.display
+
             elif event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
-                clicked_tab = None
-                for tab in panel_tabs:
+                for tab in tab_view.tabs:
                     if tab.check_mcollision():
-                        clicked_tab = tab
+                        tab_view.update_view(tab.text)
 
-                if clicked_tab != None:
-                    for tab in panel_tabs:
-                        tab.active = clicked_tab == tab
+                # Check for a result that was clicked on
+                result = search_view.check_result_clicked()
+                if result is not None:
+                    tab_view.current_search = result
+                    tab_view.update_view("Definition")
 
-        draw.draw(panel_tabs)
+                # Check for the "Clear result" button in the description tab
+                if tab_view.view == "Definition" and tab_view.definition_view.clear_search_button.check_mcollision():
+                    tab_view.current_search = None
+
+        draw.draw(search_view, tab_view, profiler)
         Globals.clock.tick(Globals.FPS)
 
 

@@ -42,8 +42,8 @@ class Checkbox:
         text_width = self.font.size(self.text)[0]
         Globals.VID_BUFFER.blit(self.font.render(self.text, True, Colors.white), (self.x - text_width -6, self.y + offset))
 
-    def check_mcollision(self):
-        return collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
+    def check_mcollision(self, offset=0):
+        return collides_point(Globals.mouse_position, (self.x, self.y + offset, self.width, self.height))
 
 class Dropdown:
     def __init__(self, rect, font, color, options, text_color):

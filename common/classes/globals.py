@@ -24,4 +24,4 @@ class Globals:
     cursor_timeout = 5 * cursor_period
     cursor_frame = 0 
 
-    MAX_RETURN_NUMBER = 10
+    MAX_RETURN_NUMBER = 15

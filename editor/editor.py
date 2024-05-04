@@ -69,6 +69,19 @@ def Main():
                 elif key == pyg.K_ESCAPE:
                     active_field = None
 
+                elif key == pyg.K_RETURN:
+                    response = SaveWord(fields, boxes)
+                    if response == "Saved":
+                        for field in fields:
+                            field.text = ""
+                        for box in boxes:
+                            box.active = False
+                        active_field = None
+                        error_message = ""
+                    else:
+                        error_message = response
+                        error_timeout = Globals.FPS * 3
+
                 else:
                     if active_field != None:
                         active_field.text, Globals.cursor_position = typing_handler.handler(active_field.text, key, (shift, caps, ctrl), Globals.cursor_position)
@@ -78,20 +91,21 @@ def Main():
             elif event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
                 active_field = None
                 
-                for field in fields:
-                    if field.check_mcollision() and field != related_input:
-                        active_field = field
-                        Globals.cursor_position = len(field.text)
-                        Globals.cursor_frame = 0
+                for i in range(len(fields)):
+                    if i > 2:
+                        if fields[i].check_mcollision(desc_offset):
+                            active_field = fields[i]
+                            Globals.cursor_position = len(fields[i].text)
+                            Globals.cursor_frame = 0
+                    else:
+                        if fields[i].check_mcollision():
+                            active_field = fields[i]
+                            Globals.cursor_position = len(fields[i].text)
+                            Globals.cursor_frame = 0
 
                 for box in boxes:
-                    if box.check_mcollision():
+                    if box.check_mcollision(desc_offset):
                         box.active = not box.active
-
-                if related_input.check_mcollision(desc_offset):
-                    active_field = related_input
-                    Globals.cursor_position = len(related_input.text)
-                    Globals.cursor_frame = 0
 
                 if save_button.check_mcollision():
                     response = SaveWord(fields, boxes)

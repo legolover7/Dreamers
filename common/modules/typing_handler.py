@@ -17,7 +17,7 @@ def handler(content, key, key_mods, cursor):
         char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[key-97] if caps or shift else "abcdefghijklmnopqrstuvwxyz"[key-97]
         cursor += 1
     if 44 <= key <= 57:
-        char = "<->?)!@#$%^&*("[key-44] if shift else ",_./0123456789"[key-44]
+        char = "<_>?)!@#$%^&*("[key-44] if shift else ",-./0123456789"[key-44]
         cursor += 1
     if 1073741913 <= key <= 1073741922:
         char = "1234567890"[key-1073741913] 

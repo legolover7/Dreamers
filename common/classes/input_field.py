@@ -15,6 +15,7 @@ class InputField():
         self.increases_upwards = increases_upwards
         self.title = title
         self.title_font = title_font
+        self.active = False
 
     def draw(self, active, offset=0):
         # Get the field's text content and set its correct color
@@ -49,7 +50,7 @@ class InputField():
             Globals.VID_BUFFER.blit(self.font.render(line, True, color), (self.x + 4, self.y + vertical_offset + (self.height - text_height)/2 + offset))
             
             # Draw cursor only on the current line
-            if self == active and (Globals.cursor_frame > Globals.cursor_timeout or (Globals.cursor_frame % Globals.cursor_period < Globals.cursor_period / 2)):
+            if (self == active or self.active) and (Globals.cursor_frame > Globals.cursor_timeout or (Globals.cursor_frame % Globals.cursor_period < Globals.cursor_period / 2)):
                 if cursor_position <= len(line):
                     text_width = self.font.size(line[:Globals.cursor_position])[0]
                     pyg.draw.rect(Globals.VID_BUFFER, Colors.white, (self.x + 4 + (text_width), self.y + vertical_offset + (self.height - text_height)/2 + offset, 2, text_height))

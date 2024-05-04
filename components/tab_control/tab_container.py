@@ -5,7 +5,7 @@ from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
 
 from common.classes.buttons import Button
-from components.tab_control.tab_components import Tab, DefinitionView
+from components.tab_control.tab_components import Tab, DefinitionView, SearchView
 
 class TabContainer:
     def __init__(self, tabs: list[Tab]):
@@ -18,6 +18,7 @@ class TabContainer:
 
         # Tabcontainer components
         self.definition_view = DefinitionView()
+        self.search_view = SearchView((Globals.WIDTH/2+50, 50))
 
     def draw(self, window, offset):
         """Draws the current tab view: search tab, description, etc."""
@@ -37,12 +38,15 @@ class TabContainer:
             tab.draw(window)
 
         # Draw current view
-        if self.view == "Definition" and self.current_search != None:
-            self.definition_view.draw(window, (x, y), self.current_search)
+        if self.view == "Definition":
+            if self.current_search != None:
+                self.definition_view.draw(window, (x, y), self.current_search)
+            else:
+                text_width = Fonts.font_30.size("No result selected")[0]
+                window.blit(Fonts.font_30.render("No result selected", True, Colors.white), (x + (width - text_width)/2, y + 70))
 
-        elif self.view == "Definition":
-            text_width = Fonts.font_30.size("No result selected")[0]
-            window.blit(Fonts.font_30.render("No result selected", True, Colors.white), (x + (width - text_width)/2, y + 70))
+        elif self.view == "Search":
+            self.search_view.draw(window)
 
     def update_view(self, option):
         """Selects one of this object's tabs based on the option provided"""

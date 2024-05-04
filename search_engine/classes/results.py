@@ -6,17 +6,22 @@ from common.modules.collider import collides_point
 from common.modules.chunk_text import chunk
 
 class Result:
-    def __init__(self, data):
+    def __init__(self, data, selected=False):
         self.data = data
         self.height = 0
         self.related_links = []
         self.generated_links = False
+        self.selected = selected
 
     def draw(self, window, offset):
         """Draws this result, including keyword, description, and related links"""
         keyword, description, related = self.get_data()
         start_offset = offset[1]
         self.ox, self.oy = offset
+
+        # Searched for indicator
+        if self.selected:
+            pyg.draw.rect(window, Colors.gray, (offset[0]-8, offset[1], Globals.WIDTH/2-6, self.height), border_radius=8)
 
         # Hover indicator
         if self.check_mcollision():

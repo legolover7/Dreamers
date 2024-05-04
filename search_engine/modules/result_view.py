@@ -7,7 +7,7 @@ from common.classes.globals import Globals
 from common.modules.collider import collides_point
 from search_engine.classes.results import Result
 
-class SearchView:
+class ResultsView:
     def __init__(self):
         self.search_results = []
         with open("data/search_terms.json", "r") as file:
@@ -24,27 +24,44 @@ class SearchView:
         for result in self.search_results:
             vertical_offset = result.draw(window, [x + 10, y + 10 + vertical_offset])
 
+        if len(self.search_results) == 0:
+            text_width = Fonts.font_30.size("No search results found")[0]
+            window.blit(Fonts.font_30.render("No search results found", True, Colors.light_gray), (x + (width - text_width)/2, y + 10))
+
     def update_search(self, criteria={}):
         """Updates the search contents based on the criteria provided"""
         self.search_results = []
         if criteria != {}:
-            searched_term = criteria["search"].lower()
+            searched_term = criteria["keyword"].lower()
+            type = criteria["type"]
+            length = len(searched_term)
             index = -1
+            
+            # "Contains" will give the index of the first item that contains the searched term
+            # "Strict" will give the index of the first item where the start of the word exactly matches the searched term
 
+            # Find the index of the first item that matches the criteria
             for i in range(len(self.data)):
-                if self.data[i]["keyword"].lower() == searched_term:
+                if searched_term in self.data[i]["keyword"].lower() and type == "contains":
                     index = i
                     break
+                elif searched_term == self.data[i]["keyword"].lower()[:length] and type == "strict":
+                    index = i
+                    break
+
             if index != -1:
                 # Add before
                 for i in range(max(0, index - Globals.MAX_RETURN_NUMBER//2), index):
                     self.search_results += [Result(self.data[i])]
 
+                # Add item
+                self.search_results += [Result(self.data[index], True)]
+
                 # Add after
-                for i in range(index, min(len(self.data), index + Globals.MAX_RETURN_NUMBER//2 + 1)):
-                    self.search_results += [Result(self.data[i])]
-                    
+                for i in range(index+1, min(len(self.data), index + Globals.MAX_RETURN_NUMBER//2 + 1)):
+                    self.search_results += [Result(self.data[i])] 
         else:
+            # Get the first MAX_RETURN_NUMBER items
             for i in range(Globals.MAX_RETURN_NUMBER):
                 if i == len(self.data):
                     break

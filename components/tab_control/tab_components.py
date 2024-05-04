@@ -1,40 +1,54 @@
 import pygame as pyg
 import copy
 
-from common.classes.buttons import Button
+from common.classes.input_field import InputField
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
 from common.modules.collider import collides_point
 import common.modules.chunk_text as chunk_text
 
-def draw(window, offset):
-    """Draws the A-Z tabbar vertically at the given location"""
-    x, y = offset
-    width, height = 50, Globals.HEIGHT
+class TabBar:
+    def draw(self, window, offset):
+        """Draws the A-Z tabbar vertically at the given location"""
+        self.x, self.y = offset
+        width, height = 50, Globals.HEIGHT
 
-    pyg.draw.rect(window, Colors.dark_black, (x, y, width, height), border_radius=5)
-    pyg.draw.rect(window, Colors.black, (x+2, y+2, width-4, height-4), border_radius=5)
+        pyg.draw.rect(window, Colors.dark_black, (self.x, self.y, width, height), border_radius=5)
+        pyg.draw.rect(window, Colors.black, (self.x + 2, self.y + 2, width-4, height-4), border_radius=5)
 
-    tab_height = height // 26
-    tab_height -= 2
+        tab_height = height // 26
+        tab_height -= 2
 
-    vertical_offset = 2
+        vertical_offset = 2
 
-    for i in range(26):
-        extra_height = 1 if (i % 3 == 0) else 0
-        rect_color = Colors.light_gray if collides_point(Globals.mouse_position, (x-1, vertical_offset-2, width, tab_height + extra_height)) else Colors.gray
+        for i in range(26):
+            extra_height = 1 if (i % 3 == 0) else 0
+            rect_color = Colors.light_gray if collides_point(Globals.mouse_position, (self.x - 1, vertical_offset-2, width, tab_height + extra_height)) else Colors.gray
 
-        if i == 0:
-            pyg.draw.rect(window, rect_color, (x+2, vertical_offset+1, width-4, tab_height), border_top_left_radius=5, border_top_right_radius=5)
-        elif i == 25:
-            pyg.draw.rect(window, rect_color, (x+2, vertical_offset, width-4, tab_height), border_bottom_left_radius=5, border_bottom_right_radius=5)
-        else:
-            pyg.draw.rect(window, rect_color, (x+2, vertical_offset, width-4, tab_height + extra_height))
+            if i == 0:
+                pyg.draw.rect(window, rect_color, (self.x + 2, vertical_offset+1, width-4, tab_height), border_top_left_radius=5, border_top_right_radius=5)
+            elif i == 25:
+                pyg.draw.rect(window, rect_color, (self.x + 2, vertical_offset, width-4, tab_height), border_bottom_left_radius=5, border_bottom_right_radius=5)
+            else:
+                pyg.draw.rect(window, rect_color, (self.x + 2, vertical_offset, width-4, tab_height + extra_height))
 
-        char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i]
-        text_width, text_height = Fonts.font_20.size(char)
-        window.blit(Fonts.font_20.render(char, True, Colors.white), (x+2 + (width - text_width)/2, vertical_offset + (tab_height - text_height)/2))
-        vertical_offset += tab_height + extra_height + 2
+            char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i]
+            text_width, text_height = Fonts.font_20.size(char)
+            window.blit(Fonts.font_20.render(char, True, Colors.white), (self.x + 2 + (width - text_width)/2, vertical_offset + (tab_height - text_height)/2))
+            vertical_offset += tab_height + extra_height + 2
+    
+    def check_mcollision(self):
+        """Checks the collision of the A-Z tabs"""
+        width, height = 50, Globals.HEIGHT
+        vertical_offset = 2
+        tab_height = height // 26
+        tab_height -= 2
+
+        for i in range(26):
+            extra_height = 1 if (i % 3 == 0) else 0
+            if collides_point(Globals.mouse_position, (self.x-1, vertical_offset-2, width, tab_height + extra_height)):
+                return i
+            vertical_offset += tab_height + extra_height + 2
 
 def draw_field_multiline(window, width, font, text: list, position, none_text="No description set"):
         """Draws lines of text starting at the given position"""
@@ -89,6 +103,7 @@ class DefinitionView:
         self.clear_search_button = None
 
     def draw(self, window, position, current_search):
+        """Draws the definition view component"""
         # Get position to draw
         x, y = position
         field_width = 800
@@ -171,3 +186,38 @@ class DefinitionView:
                 line_offset_h += Fonts.font_24.size(attribute + " ")[0]
 
         self.clear_search_button.draw()
+
+
+class SearchView:
+    def __init__(self, position):
+        self.x, self.y = position
+        self.width, self.height = Globals.WIDTH - self.x, Globals.HEIGHT - 50
+        self.searchbar = InputField((self.x + 50, self.y + 50, self.width - 100, 30), Fonts.font_20, "Enter Search")
+        self.history = []
+
+    def draw(self, window):
+        """Draws the search view component"""
+        window.blit(Fonts.font_24.render("Search for Terms:", True, Colors.white), (self.x + 50, self.y + 20))
+        self.searchbar.draw(None)
+        char_height = Fonts.font_24.size("A")[1]
+
+        window.blit(Fonts.font_24.render("Search History:", True, Colors.white), (self.x + 50, self.y + 100))
+        pyg.draw.rect(window, Colors.gray, (self.x + 50, self.y + 130, self.width - 100, (char_height + 2) * 20), border_radius=8)
+        pyg.draw.rect(window, Colors.black, (self.x + 52, self.y + 132, self.width - 104, (char_height + 2) * 20 - 4), border_radius=8)
+
+        # Draw search history links
+        for i in range(min(20, len(self.history))):
+            index = len(self.history) - i - 1
+
+            if collides_point(Globals.mouse_position, (self.x + 55, self.y + 134 + i * (char_height + 2), self.width - 110, char_height + 2)):
+                pyg.draw.rect(window, Colors.gray, (self.x + 55, self.y + 134 + i * (char_height + 2), self.width - 110, char_height + 2), border_radius=4)
+
+            window.blit(Fonts.font_24.render(self.history[index], True, Colors.white), (self.x + 60, self.y + 135 + i * (char_height + 2)))
+
+    def check_history_clicked(self):
+        for i in range(min(20, len(self.history))):
+            index = len(self.history) - i - 1
+            char_height = Fonts.font_24.size("A")[1]
+
+            if collides_point(Globals.mouse_position, (self.x + 50, self.y + 129 + i * (char_height + 2), self.width - 100, char_height + 2)):
+                return index

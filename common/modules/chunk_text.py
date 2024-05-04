@@ -13,6 +13,8 @@ def chunk(text, max_length=0, content_width=0, char_width=0):
         except:
             return [text]
     
+    if text == " ":
+        return [" "]
     
     begin_spc = False
     char = False

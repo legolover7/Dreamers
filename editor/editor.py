@@ -49,6 +49,7 @@ def Main():
     active_field = None
     error_message = ""
     error_timeout = 0
+    index = -1
 
     while True:
         text_lines = chunk_text.chunk(description_input.text, content_width=description_input.width-5, char_width=description_input.font.size("A")[0])
@@ -87,6 +88,15 @@ def Main():
                         error_message = response
                         error_timeout = Globals.FPS * 3
 
+                elif key == pyg.K_TAB:
+                    if shift:
+                        index = max(0, index - 1)
+
+                    else:
+                        index = min(index + 1, len(fields) - 1)
+
+                    active_field = fields[index]
+
                 elif key == pyg.K_v and ctrl and active_field != None:
                     active_field.text = pyperclip.paste()
                     Globals.cursor_position = len(active_field.text)
@@ -106,11 +116,15 @@ def Main():
                             active_field = fields[i]
                             Globals.cursor_position = len(fields[i].text)
                             Globals.cursor_frame = 0
+                            index = i
+                            break
                     else:
                         if fields[i].check_mcollision():
                             active_field = fields[i]
                             Globals.cursor_position = len(fields[i].text)
                             Globals.cursor_frame = 0
+                            index = i
+                            break
 
                 for box in boxes:
                     if box.check_mcollision(desc_offset):

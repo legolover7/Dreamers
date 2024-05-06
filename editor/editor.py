@@ -2,6 +2,7 @@
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 import pygame as pyg
+import pyperclip
 import json
 import sys
 import os
@@ -86,6 +87,9 @@ def Main():
                         error_message = response
                         error_timeout = Globals.FPS * 3
 
+                elif key == pyg.K_v and ctrl and active_field != None:
+                    active_field.text = pyperclip.paste()
+                    Globals.cursor_position = len(active_field.text)
                 else:
                     if active_field != None:
                         active_field.text, Globals.cursor_position = typing_handler.handler(active_field.text, key, (shift, caps, ctrl), Globals.cursor_position)

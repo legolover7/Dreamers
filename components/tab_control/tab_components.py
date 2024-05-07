@@ -1,10 +1,15 @@
 import pygame as pyg
 import copy
+import json
+import time
+import os
 
-from common.classes.buttons import Checkbox
+from common.classes.buttons import Button, Checkbox
 from common.classes.input_field import InputField
 from common.classes.display import Colors, Fonts
-from common.classes.globals import Globals
+from common.classes.globals import Globals, FilePaths
+from common.classes.list_container import *
+
 from common.modules.collider import collides_point
 import common.modules.chunk_text as chunk_text
 
@@ -146,9 +151,10 @@ class DefinitionView:
         temp_related = copy.deepcopy(related)
         for i in range(len(temp_related)):
             if temp_related[i] != "No related terms set":
-                temp_related[i] = "(" + str(i+1) + ") " + temp_related[i][0].capitalize() + temp_related[i][1:]
+                temp_related[i] = temp_related[i][0].capitalize() + temp_related[i][1:] 
+                temp_related[i] += "," if i != len(temp_related) - 1 else ""
             
-        line_offset = draw_field_multiline(window, field_width, Fonts.font_24, temp_related, (x + 40, line_offset), none_text="No related links set")
+        line_offset = draw_field_multiline(window, field_width, Fonts.font_24, temp_related, (x + 40, line_offset), none_text="No related terms set")
 
         # Draw references
         references = current_search.data["references"]
@@ -186,7 +192,7 @@ class DefinitionView:
                 window.blit(Fonts.font_24.render(attribute, True, Colors.green), (x + 40 + line_offset_h, line_offset + 4))
                 line_offset_h += Fonts.font_24.size(attribute + " ")[0]
 
-        self.clear_search_button.draw()
+        self.clear_search_button.draw(window)
 
 
 class SearchView:
@@ -199,7 +205,7 @@ class SearchView:
     def draw(self, window):
         """Draws the search view component"""
         window.blit(Fonts.font_24.render("Search for Terms:", True, Colors.white), (self.x + 50, self.y + 20))
-        self.searchbar.draw(None)
+        self.searchbar.draw(window)
         char_height = Fonts.font_24.size("A")[1]
 
         window.blit(Fonts.font_24.render("Search History:", True, Colors.white), (self.x + 50, self.y + 100))
@@ -228,13 +234,68 @@ class SettingsView:
         self.x, self.y = position
         self.width, self.height = Globals.WIDTH - self.x, Globals.HEIGHT - 50
 
-        # Settings!
+        self.data = {
+            "show_fps": False,
+            "save_history": True 
+        }
+
+        if os.path.isfile(FilePaths.settings):
+            with open(FilePaths.settings, "r") as file:
+                self.data = json.load(file)
+
+        # Settings
         self.boxes = {
-            "show_fps": Checkbox((self.x + 20, self.y + 20, 20, 20), "Show FPS", Fonts.font_20, right_align=True),
-            "save_history": Checkbox((self.x + 20, self.y + 50, 20, 20), "Save Search History", Fonts.font_20, True, right_align=True)
+            "show_fps": Checkbox((self.x + 20, self.y + 20, 20, 20), "Show FPS", Fonts.font_20, default_active=self.data["show_fps"], value="show_fps", left_align=True),
+            "save_history": Checkbox((self.x + 20, self.y + 50, 20, 20), "Save Search History", Fonts.font_20, default_active=self.data["save_history"], value="save_history", left_align=True)
         }
 
     def draw(self, window):
         """Draws the settings view component"""
         for box in self.boxes.keys():
             self.boxes[box].draw(window)
+
+        text_width, text_height = Fonts.font_20.size("Special thanks to my girlfriend, without whom")
+        window.blit(Fonts.font_20.render("Special thanks to my girlfriend, without whom", True, Colors.gray), (self.x + (self.width - text_width) / 2, self.y + self.height - text_height * 2 - 2))
+        text_width, text_height = Fonts.font_20.size("I wouldn't have been able to complete this project.")
+        window.blit(Fonts.font_20.render("I wouldn't have been able to complete this project.", True, Colors.gray), (self.x + (self.width - text_width) / 2, self.y + self.height - text_height - 2))
+
+class DreamLogView:
+    def __init__(self, position):
+        self.x, self.y = position
+        self.width, self.height = Globals.WIDTH - self.x, Globals.HEIGHT - 50
+
+        # Fields/buttons
+        self.dream_input = InputField((self.x + 20, self.y + 20, self.width - 40, self.height / 2 - 100), Fonts.font_24, "Enter dream", scrollable=True, center_text=False)
+        self.dream_title = InputField((self.x + 20, self.y + self.height / 2 - 60, 400, 30), Fonts.font_20, "Enter title", scrollable=True, center_text=False)
+        self.date_input = InputField((self.x + 450, self.y + self.height / 2 - 60, 200, 30), Fonts.font_20, "Date of dream", scrollable=True, center_text=False)
+        self.save_button = Button((self.x + 700, self.y + self.height / 2 - 65, 150, 40), Colors.green, "Save Dream", Fonts.font_20, Colors.white)
+        
+        self.list_container = ListContainer((self.x + 20, self.y + self.height / 2 + 30, self.width * 2 / 3, self.height / 2 - 40))
+        # Get saved dreams
+        if os.path.isfile(FilePaths.logs):
+            with open(FilePaths.logs, "r") as infile:
+                data = json.load(infile)["dreams"]
+                for log in data:
+                    self.list_container.contents.append(ListContent(log["title"], log["date_dreamed"], log["date_entered"], log["data"]))
+
+    def draw(self, window):
+        self.dream_input.draw(window)
+        self.dream_title.draw(window)
+        self.date_input.draw(window)
+        self.save_button.draw(window)
+        self.list_container.draw(window)
+
+        window.blit(Fonts.font_24.render("Saved Dreams:", True, Colors.white), (self.x + 20, self.y + self.height / 2))
+    
+    def save_dream(self):
+        """Saves the text in the two input fields into a list content object, stored into the list container"""
+        if self.dream_input.text.strip() != "" and self.dream_title.text.strip() != "" and self.date_input.text.strip() != "":
+            current_date = time.strftime("%m/%d/%Y")
+            # Check if the title already exists
+            for item in self.list_container.contents:
+                if item.title == self.dream_title.text:
+                    item.data = self.dream_input.text
+                    item.date_entered = current_date
+                    item.date_dreamed = self.date_input.text
+                    return
+            self.list_container.contents.append(ListContent(self.dream_title.text, self.date_input.text, current_date, self.dream_input.text))

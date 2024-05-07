@@ -25,3 +25,8 @@ class Globals:
     cursor_frame = 0 
 
     MAX_RETURN_NUMBER = 15
+
+
+class FilePaths:
+    settings = "./data/settings.json"
+    logs = "./data/dreams.json"

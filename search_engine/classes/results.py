@@ -71,6 +71,11 @@ class Result:
         """Returns true if mouse cursor is within this result's bound"""
         return collides_point(Globals.mouse_position, (self.ox-8, self.oy, Globals.WIDTH/2-6, self.height))
 
+    def check_related_click(self):
+        for link in self.related_links:
+            if collides_point(Globals.mouse_position, (link["rect"])):
+                return link["term"]
+
     def get_data(self):
         """Gets data from self, returns the result's keyword, description, and related links"""
         keyword = self.data["keyword"]

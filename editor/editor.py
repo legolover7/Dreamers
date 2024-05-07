@@ -89,11 +89,8 @@ def Main():
                         error_timeout = Globals.FPS * 3
 
                 elif key == pyg.K_TAB:
-                    if shift:
-                        index = max(0, index - 1)
-
-                    else:
-                        index = min(index + 1, len(fields) - 1)
+                    if shift: index = max(0, index - 1)
+                    else: index = min(index + 1, len(fields) - 1)
 
                     active_field = fields[index]
 

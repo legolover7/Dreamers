@@ -1,17 +1,23 @@
 import pygame as pyg
 import json
-pyg.init()
+import os
 
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
-from common.modules.collider import collides_point
 from search_engine.classes.results import Result
 
 class ResultsView:
     def __init__(self):
         self.search_results = []
-        with open("data/search_terms.json", "r") as file:
-            self.data = json.load(file)["terms"]
+        
+        # Read data from search_terms.json
+        if os.path.isfile("./data/search_terms.json"):
+            with open("data/search_terms.json", "r") as file:
+                self.data = json.load(file)["terms"]
+        else:
+            with open("data/search_terms.json", "w") as file:
+                file.write(json.dumps({"terms": []}, indent=4))
+                self.data = []
 
     def draw(self, window, offset):
         x, y = offset
@@ -70,5 +76,9 @@ class ResultsView:
     def check_result_clicked(self):
         """Checks if any of its the view's results were clicked"""
         for result in self.search_results:
+            # Check if a related link was clicked, first
+            link = result.check_related_click()
+            if link:
+                return link
             if result.check_mcollision():
                 return result

@@ -2,15 +2,18 @@ import pygame as pyg
 import sys
 import os
 
+# Common classes
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
 from common.modules.profiler import Profiler
-from common.modules.typing_handler import handler
-
-import search_engine.modules.draw as draw
+# Specific classes
 from search_engine.modules.result_view import ResultsView
 from components.tab_control.tab_container import TabContainer
 from components.tab_control.tab_components import Tab, TabBar
+# Modules
+import search_engine.modules.event_handlers as ev_handlers
+import search_engine.modules.draw as draw
+import search_engine.modules.save_handler as s_handler
 
 def Main():
     # Initialize window
@@ -25,9 +28,9 @@ def Main():
     results_view = ResultsView()
     results_view.update_search()
 
-    profiler = Profiler(Globals.FPS, (Globals.WIDTH - 30, 4), Fonts.font_20, Colors.white)
+    profiler = Profiler(Globals.FPS, (Globals.WIDTH - 30, Globals.HEIGHT - 22), Fonts.font_20, Colors.white)
     
-    tab_view = TabContainer([Tab((Globals.WIDTH/2 + 52, 0, 75, 30), "Search"), Tab((Globals.WIDTH/2 + 125, 0, 120, 30), "Definition"), Tab((Globals.WIDTH/2 + 243, 0, 100, 30), "Settings")])
+    tab_view = TabContainer([Tab((Globals.WIDTH/2 + 52, 0, 75, 30), "Search"), Tab((Globals.WIDTH/2 + 125, 0, 120, 30), "Definition"), Tab((Globals.WIDTH/2 + 243, 0, 110, 30), "Dream Log"), Tab((Globals.WIDTH/2 + 351, 0, 100, 30), "Settings")])
     tab_bar = TabBar()
 
     while True:
@@ -38,8 +41,7 @@ def Main():
         for event in pyg.event.get():
             Globals.mouse_position = pyg.mouse.get_pos()
             if event.type == pyg.QUIT:
-                pyg.quit()
-                sys.exit()
+                Quit(tab_view)
 
             elif event.type == pyg.KEYDOWN:
                 key = event.key
@@ -48,8 +50,7 @@ def Main():
 
                 # Kill key
                 if key == pyg.K_F1:
-                    pyg.quit()
-                    sys.exit()
+                    Quit(tab_view)
 
                 if key == pyg.K_F9:
                     tab_view.settings_view.boxes["show_fps"].active = not tab_view.settings_view.boxes["show_fps"].active
@@ -65,50 +66,32 @@ def Main():
                         results_view.update_search({"keyword": search, "type": "contains"})
 
                 else:
-                    if tab_view.search_view.searchbar.active and not (key == pyg.K_SPACE and tab_view.search_view.searchbar.text == ""):
-                        tab_view.search_view.searchbar.text, Globals.cursor_position = handler(tab_view.search_view.searchbar.text, key, (shift, caps, ctrl), Globals.cursor_position)
+                    ev_handlers.handle_input(key, (shift, caps, ctrl), tab_view)
 
             elif event.type == pyg.MOUSEBUTTONDOWN and event.button == 1:
-                tab_view.search_view.searchbar.active = False
-                # Check for the different tabs for the tab view (right half)
-                for tab in tab_view.tabs:
-                    if tab.check_mcollision():
-                        tab_view.update_view(tab.text)
-
-                # Check for a result that was clicked on
-                result = results_view.check_result_clicked()
-                if result is not None:
-                    tab_view.current_search = result
-                    tab_view.update_view("Definition")
-                    
-                # Check for the different tabs for the tabbar (leftmost size)
-                index = tab_bar.check_mcollision()
-                if index != None:
-                    results_view.update_search({"keyword": "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[index], "type": "strict"})
-
-                index = tab_view.search_view.check_history_clicked()
-                if index != None:
-                    results_view.update_search({"keyword": tab_view.search_view.history[index], "type": "strict"})
-
-                # Check for the "Clear result" button in the description tab
-                if tab_view.view == "Definition" and tab_view.definition_view.clear_search_button.check_mcollision():
-                    tab_view.current_search = None
-
-                # Check for search's searchbar
-                elif tab_view.view == "Search" and tab_view.search_view.searchbar.check_mcollision():
-                    tab_view.search_view.searchbar.active = True
-                    Globals.cursor_position = len(tab_view.search_view.searchbar.text)
-
-                # Check for settings' checkboxes
-                elif tab_view.view == "Settings":
-                    for box_key in tab_view.settings_view.boxes.keys():
-                        box = tab_view.settings_view.boxes[box_key]
-                        if box.check_mcollision():
-                            box.active = not box.active
+                result = ev_handlers.handle_mouse_click(tab_view, results_view, tab_bar)
+                if result == "QUIT":
+                    Quit(tab_view)
+            
+            elif event.type == pyg.MOUSEWHEEL:
+                ev_handlers.handle_mouse_scroll(tab_view, event)
 
         draw.draw(results_view, tab_view, tab_bar, profiler)
         Globals.clock.tick(Globals.FPS)
 
+def Quit(tab_view: TabContainer):
+    # Save data
+    s_handler.save_settings(tab_view.settings_view.data)
+
+    dream_data = {"dreams": []}
+    for dream in tab_view.dream_log_view.list_container.contents:
+        dream_data["dreams"].append({"title": dream.title, "date_dreamed": dream.date_dreamed, "date_entered": dream.date_entered, "data": dream.data})
+        
+    s_handler.save_dreams(dream_data)
+
+    # Exit pygame as program
+    pyg.quit()
+    sys.exit()
 
 if __name__ == "__main__":
     Main()

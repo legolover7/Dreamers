@@ -14,15 +14,15 @@ def draw(fields, boxes, buttons, active_field, desc_offset, error_message, error
     for i in range(len(fields)):
         field = fields[i]
         if i > 2:
-            field.draw(active_field, desc_offset)
+            field.draw(VID_BUFFER, active_field, desc_offset)
         else:
-            field.draw(active_field)
+            field.draw(VID_BUFFER, active_field)
 
     for box in boxes:
         box.draw(VID_BUFFER, desc_offset)
 
     for button in buttons:
-        button.draw()
+        button.draw(VID_BUFFER)
 
     if error_timeout > 0:
         text_width = Fonts.font_20.size(error_message)[0]

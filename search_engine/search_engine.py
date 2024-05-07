@@ -39,7 +39,8 @@ def Main():
 
         # Get events
         for event in pyg.event.get():
-            Globals.mouse_position = pyg.mouse.get_pos()
+            Globals.mouse_position[0] = pyg.mouse.get_pos()[0] * (Globals.WIDTH / Globals.WINDOW_WIDTH)
+            Globals.mouse_position[1] = pyg.mouse.get_pos()[1] * (Globals.HEIGHT / Globals.WINDOW_HEIGHT)
             if event.type == pyg.QUIT:
                 Quit(tab_view)
 

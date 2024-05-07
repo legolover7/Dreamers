@@ -61,7 +61,7 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
         if isinstance(result, str):
             results_view.update_search({"keyword": result, "type": "strict"})
             tab_view.update_view("Search")
-            tab_view.search_view.searchbar.text = result
+            tab_view.search_view.history.append(result)
         else:
             tab_view.current_search = result
             tab_view.update_view("Definition")

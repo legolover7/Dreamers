@@ -4,7 +4,7 @@ import json
 import time
 import os
 
-from common.classes.buttons import Button, Checkbox
+from common.classes.buttons import *
 from common.classes.input_field import InputField
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals, FilePaths
@@ -81,7 +81,6 @@ def draw_field_multiline(window, width, font, text: list, position, none_text="N
                 y += char_height + 2
 
         return y
-
 
 class Tab:
     def __init__(self, rect, text):
@@ -236,20 +235,27 @@ class SettingsView:
 
         self.data = {
             "show_fps": False,
-            "save_history": True 
+            "save_history": True,
+            "confirm_log_delete": True
         }
 
         if os.path.isfile(FilePaths.settings):
             with open(FilePaths.settings, "r") as file:
                 self.data = json.load(file)
 
+        # Settings' tooltips
+        fps_tt = ToolTip("Determines whether or not the FPS (Frames per Second) of the application is displayed.", Globals.FPS/2, 600)
+        save_ttp = ToolTip("Determines whether or not search queries are saved.", Globals.FPS/2, 600)
+        cfld_ttp = ToolTip("Determines whether or not the confirmation popup for the dream log deletion is shown.", Globals.FPS/2, 600)
+
         # Settings
         self.boxes = {
-            "show_fps": Checkbox((self.x + 20, self.y + 20, 20, 20), "Show FPS", Fonts.font_20, default_active=self.data["show_fps"], value="show_fps", left_align=True),
-            "save_history": Checkbox((self.x + 20, self.y + 50, 20, 20), "Save Search History", Fonts.font_20, default_active=self.data["save_history"], value="save_history", left_align=True)
+            "show_fps": Checkbox((self.x + 20, self.y + 20, 20, 20), "Show FPS", Fonts.font_20, default_active=self.data["show_fps"], value="show_fps", left_align=True, tooltip=fps_tt),
+            "save_history": Checkbox((self.x + 20, self.y + 50, 20, 20), "Save Search History", Fonts.font_20, default_active=self.data["save_history"], value="save_history", left_align=True, tooltip=save_ttp),
+            "confirm_log_delete": Checkbox((self.x + 20, self.y + 80, 20, 20), "Show Dream Log Removal Confirmation", Fonts.font_20, default_active=self.data["confirm_log_delete"], value="confirm_log_delete", left_align=True, tooltip=cfld_ttp)
         }
 
-    def draw(self, window):
+    def draw(self, window: pyg.Surface):
         """Draws the settings view component"""
         for box in self.boxes.keys():
             self.boxes[box].draw(window)
@@ -259,16 +265,22 @@ class SettingsView:
         text_width, text_height = Fonts.font_20.size("I wouldn't have been able to complete this project.")
         window.blit(Fonts.font_20.render("I wouldn't have been able to complete this project.", True, Colors.gray), (self.x + (self.width - text_width) / 2, self.y + self.height - text_height - 2))
 
+        for box in self.boxes:
+            if self.boxes[box].tooltip != None and self.boxes[box].tooltip.current_delay >= self.boxes[box].tooltip.min_delay:
+                self.boxes[box].tooltip.draw(window, (self.boxes[box].x, self.boxes[box].y + self.boxes[box].height))
+
 class DreamLogView:
     def __init__(self, position):
         self.x, self.y = position
         self.width, self.height = Globals.WIDTH - self.x, Globals.HEIGHT - 50
+        self.popup_displayed = False
 
         # Fields/buttons
         self.dream_input = InputField((self.x + 20, self.y + 20, self.width - 40, self.height / 2 - 100), Fonts.font_24, "Enter dream", scrollable=True, center_text=False)
         self.dream_title = InputField((self.x + 20, self.y + self.height / 2 - 60, 400, 30), Fonts.font_20, "Enter title", scrollable=True, center_text=False)
         self.date_input = InputField((self.x + 450, self.y + self.height / 2 - 60, 200, 30), Fonts.font_20, "Date of dream", scrollable=True, center_text=False)
         self.save_button = Button((self.x + 700, self.y + self.height / 2 - 65, 150, 40), Colors.green, "Save Dream", Fonts.font_20, Colors.white)
+        self.delete_button = Button((self.x + 700, self.y + self.height / 2, 150, 40), Colors.red, "Remove Dream", Fonts.font_20, Colors.white)
         
         self.list_container = ListContainer((self.x + 20, self.y + self.height / 2 + 30, self.width * 2 / 3, self.height / 2 - 40))
         # Get saved dreams
@@ -283,6 +295,7 @@ class DreamLogView:
         self.dream_title.draw(window)
         self.date_input.draw(window)
         self.save_button.draw(window)
+        self.delete_button.draw(window)
         self.list_container.draw(window)
 
         window.blit(Fonts.font_24.render("Saved Dreams:", True, Colors.white), (self.x + 20, self.y + self.height / 2))

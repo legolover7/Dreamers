@@ -5,7 +5,7 @@ import os
 # Common classes
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
-from common.modules.profiler import Profiler
+from components.utilities.profiler import Profiler
 # Specific classes
 from search_engine.modules.result_view import ResultsView
 from components.tab_control.tab_container import TabContainer

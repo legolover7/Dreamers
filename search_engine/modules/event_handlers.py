@@ -44,7 +44,29 @@ def handle_input(key, mods, tab_view: TabContainer):
         else:
             tab_view.dream_log_view.date_input.text, Globals.cursor_position = typing_handler.handler(tab_view.dream_log_view.date_input.text, key, mods, Globals.cursor_position)
 
-def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_bar: TabBar):
+def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_bar: TabBar):    
+    # Clear popups
+    if tab_view.popup.displayed and not tab_view.popup.check_mcollision():
+        tab_view.popup.displayed = False
+        tab_view.dream_log_view.popup_displayed = False
+    elif tab_view.popup.displayed:
+        # Dream log button
+        if tab_view.dream_log_view.popup_displayed and tab_view.popup.cancel_button.check_mcollision():
+            tab_view.popup.displayed = False
+            tab_view.dream_log_view.popup_displayed = False
+        elif tab_view.dream_log_view.popup_displayed and tab_view.popup.confirm_button.check_mcollision():
+            # Remove the log from the list
+            for log in tab_view.dream_log_view.list_container.contents:
+                if log.title == tab_view.dream_log_view.dream_title.text:
+                    tab_view.dream_log_view.list_container.contents.remove(log)
+
+            # Reset fields
+            tab_view.dream_log_view.dream_input.text = ""
+            tab_view.dream_log_view.dream_title.text = ""
+            tab_view.dream_log_view.date_input.text = ""
+            tab_view.popup.displayed = False
+            tab_view.dream_log_view.popup_displayed = False
+    
     # Check for close button
     if collider.collides_point_circle(Globals.mouse_position, (Globals.WIDTH - 19, 15), 12):
         return "QUIT"
@@ -79,6 +101,7 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
     if tab_view.view == "Definition":
         if tab_view.definition_view.clear_search_button.check_mcollision():
             tab_view.current_search = None
+            results_view.update_search()
 
     # Check for search's searchbar
     elif tab_view.view == "Search":
@@ -104,10 +127,27 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
             Globals.cursor_position = len(tab_view.dream_log_view.date_input.text)
             
         # Dream log save button
-        if tab_view.dream_log_view.save_button.check_mcollision():
-            tab_view.dream_log_view.save_dream()
-            tab_view.dream_log_view.dream_input.text = ""
-            tab_view.dream_log_view.dream_title.text = ""
+        elif tab_view.dream_log_view.save_button.check_mcollision():
+                tab_view.dream_log_view.save_dream()
+                tab_view.dream_log_view.dream_input.text = ""
+                tab_view.dream_log_view.dream_title.text = ""
+                tab_view.dream_log_view.date_input.text = ""
+
+        # Dream log remove button
+        elif tab_view.dream_log_view.delete_button.check_mcollision() and tab_view.dream_log_view.dream_title.text != "":
+            if tab_view.settings_view.data["confirm_log_delete"]:
+                tab_view.popup.displayed = True
+                tab_view.dream_log_view.popup_displayed = True
+            else:
+                # Remove the log from the list
+                for log in tab_view.dream_log_view.list_container.contents:
+                    if log.title == tab_view.dream_log_view.dream_title.text:
+                        tab_view.dream_log_view.list_container.contents.remove(log)
+
+                # Reset fields
+                tab_view.dream_log_view.dream_input.text = ""
+                tab_view.dream_log_view.dream_title.text = ""
+                tab_view.dream_log_view.date_input.text = ""            
 
         # List container
         item = tab_view.dream_log_view.list_container.check_click()

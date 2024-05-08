@@ -6,6 +6,7 @@ from common.classes.globals import Globals
 
 from common.classes.buttons import Button
 from components.tab_control.tab_components import *
+from common.classes.popup import Popup
 
 class TabContainer:
     def __init__(self, tabs: list[Tab]):
@@ -15,6 +16,7 @@ class TabContainer:
         self.view = tabs[0].text
         tabs[0].active = True
         self.clear_search_button = None
+        self.popup = None
 
         # Tabcontainer components
         self.definition_view = DefinitionView()
@@ -26,7 +28,9 @@ class TabContainer:
         """Draws the current tab view: search tab, description, etc."""
         x, y = offset
         width, height = Globals.WIDTH-x, Globals.HEIGHT
-        
+        if self.popup == None:
+            self.popup = Popup((x + width/2 - 200, y + height/2 - 90, 400, 180), "Are you sure you want to remove this dream log?", 60)
+
         if self.definition_view.clear_search_button == None:
             self.definition_view.clear_search_button = Button((x + width/2 - 100, Globals.HEIGHT - 50, 200, 40), Colors.red, "Clear Result", Fonts.font_20, Colors.white)
 
@@ -55,6 +59,9 @@ class TabContainer:
 
         elif self.view == "Dream Log":
             self.dream_log_view.draw(window)
+            
+        if self.popup.displayed:
+            self.popup.draw(window)
 
     def update_view(self, option):
         """Selects one of this object's tabs based on the option provided"""

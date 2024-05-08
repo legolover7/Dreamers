@@ -23,7 +23,7 @@ def chunk(text, max_length=0, content_width=0, char_width=0):
     text_list = []
     out_list = []
 
-    tail = 0
+    tail = 0    
     # Split text on spaces
     for head in range(len(text)):
         if text[head] == " " and char or head == len(text)-1:

@@ -16,35 +16,35 @@ def handler(content, key, key_mods, cursor):
     if 97 <= key <= 122:
         char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[key-97] if caps or shift else "abcdefghijklmnopqrstuvwxyz"[key-97]
         cursor += 1
-    if 44 <= key <= 57:
+    elif 44 <= key <= 57:
         char = "<_>?)!@#$%^&*("[key-44] if shift else ",-./0123456789"[key-44]
         cursor += 1
-    if 1073741913 <= key <= 1073741922:
+    elif 1073741913 <= key <= 1073741922:
         char = "1234567890"[key-1073741913] 
         cursor += 1
 
-    if key == 39:
+    elif key == 39:
         char = "\"" if shift else "'"
         cursor += 1
-    if key == 96:
+    elif key == 96:
         char = "~" if shift else "`"
         cursor += 1
-    if key == 61:
+    elif key == 61:
         char = "+" if shift else "="
         cursor += 1
-    if key == 59:
+    elif key == 59:
         char = ":" if shift else ";"
         cursor += 1
-    if key == 91:
+    elif key == 91:
         char = "{" if shift else "["
         cursor += 1
-    if key == 93:
+    elif key == 93:
         char = "}" if shift else "]"
         cursor += 1
-    if key == pyg.K_SPACE:
+    elif key == pyg.K_SPACE:
         char = " " 
         cursor += 1
-        
+
     content = content[:cursor-1] + char + content[cursor-1:]
 
     # Ctrl+Shift+Backspace == delete all content

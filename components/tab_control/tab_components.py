@@ -8,7 +8,7 @@ import time
 import os
 
 from common.classes.buttons import *
-from common.classes.input_field import InputField
+from common.classes.input_field import DateInput, InputField
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals, FilePaths
 from common.classes.list_container import *
@@ -281,7 +281,7 @@ class DreamLogView:
         # Fields/buttons
         self.dream_input = InputField((self.x + 20, self.y + 20, self.width - 40, self.height / 2 - 100), Fonts.font_24, "Enter dream", scrollable=True, center_text=False)
         self.dream_title = InputField((self.x + 20, self.y + self.height / 2 - 60, 400, 30), Fonts.font_20, "Enter title", scrollable=True, center_text=False)
-        self.date_input = InputField((self.x + 450, self.y + self.height / 2 - 60, 200, 30), Fonts.font_20, "Date of dream", scrollable=True, center_text=False)
+        self.date_input = DateInput((self.x + 450, self.y + self.height / 2 - 60, 200, 30), "MM/DD/YYYY")
         self.save_button = Button((self.x + 700, self.y + self.height / 2 - 65, 150, 40), Colors.green, "Save Dream", Fonts.font_20, Colors.white)
         self.delete_button = Button((self.x + 700, self.y + self.height / 2, 150, 40), Colors.red, "Remove Dream", Fonts.font_20, Colors.white)
 
@@ -308,17 +308,24 @@ class DreamLogView:
         window.blit(Fonts.font_24.render("Saved Dreams:", True, Colors.white), (self.x + 20, self.y + self.height / 2))
     
     def save_dream(self):
-        """Saves the text in the two input fields into a list content object, stored into the list container"""
-        if self.dream_input.text.strip() != "" and self.dream_title.text.strip() != "" and self.date_input.text.strip() != "":
+        """Saves the text in the input fields into a list content object"""
+        if self.dream_input.text.strip() != "" and self.dream_title.text.strip() != "" and len(self.date_input.text) == 8:
             current_date = time.strftime("%m/%d/%Y")
+            temp = ""
+            date_dreamt = self.date_input.text
+            for chunk in self.date_input.format.split("/")[:-1]:
+                temp += date_dreamt[:len(chunk)] + "/"
+                date_dreamt = date_dreamt[len(chunk):]
+            temp += date_dreamt
             # Check if the title already exists
             for item in self.list_container.contents:
                 if item.title == self.dream_title.text:
                     item.data = self.dream_input.text
                     item.date_modified = current_date
-                    item.date_dreamt = self.date_input.text
+                    item.date_dreamt = temp
                     return
-            self.list_container.contents.append(ListContent(self.dream_title.text, self.date_input.text, current_date, self.dream_input.text))
+            self.list_container.contents.append(ListContent(self.dream_title.text, temp, current_date, self.dream_input.text))
+            return True
 
     def sort_dreams(self, option):
         """Sorts the saved dreams based on the option provided"""

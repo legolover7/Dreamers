@@ -2,6 +2,37 @@ import contextlib
 with contextlib.redirect_stdout(None):
     import pygame as pyg
 
+def handle_ints(content, key, key_mods, cursor):
+    """Handles the entry of specifically integers"""
+    shift, caps, ctrl = key_mods
+    char = ""
+    
+    if 48 <= key <= 57:
+        char = "0123456789"[key-48]
+        cursor += 1
+    elif 1073741913 <= key <= 1073741922:
+        char = "1234567890"[key-1073741913] 
+        cursor += 1
+
+    content = content[:cursor-1] + char + content[cursor-1:]
+
+    # Ctrl/Backspace
+    if key == pyg.K_BACKSPACE and len(content) > 0 and cursor != 0:
+        if not ctrl:
+            content = content[:cursor-1] + content[cursor:]
+            cursor = max(cursor-1, 0)
+        else:
+            content += " "
+            for i in range(cursor, 0, -1):
+                i -= 1
+                if content[i] == " ":
+                    break
+            content = content[:i] + content[cursor:]
+            cursor = i
+            content = content[:-1]
+            
+    return content, cursor
+
 # Keyboard input for text boxes
 def handler(content, key, key_mods, cursor):
     '''

@@ -38,13 +38,14 @@ def handle_input(key, mods, tab_view: TabContainer):
         else:
             tab_view.dream_log_view.dream_title.text, Globals.cursor_position = typing_handler.handler(tab_view.dream_log_view.dream_title.text, key, mods, Globals.cursor_position)
 
+    # Dream log date
     elif tab_view.dream_log_view.date_input.active:
         if key == pyg.K_TAB and shift:
             tab_view.dream_log_view.dream_title.active = True
             tab_view.dream_log_view.date_input.active = False
             Globals.cursor_position = len(tab_view.dream_log_view.dream_title.text)
         else:
-            tab_view.dream_log_view.date_input.text, Globals.cursor_position = typing_handler.handler(tab_view.dream_log_view.date_input.text, key, mods, Globals.cursor_position)
+            tab_view.dream_log_view.date_input.text, Globals.cursor_position = typing_handler.handle_ints(tab_view.dream_log_view.date_input.text, key, mods, Globals.cursor_position)
 
 def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_bar: TabBar):    
     # Confirmation popups
@@ -90,11 +91,10 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
             results_view.update_search({"keyword": result, "type": "strict"})
             tab_view.update_view("Search")
             tab_view.search_view.history.append(result)
-            return
         else:
             tab_view.current_search = result
             tab_view.update_view("Definition")
-            return
+        return
         
     # Check for the different tabs for the tabbar (leftmost size)
     index = tab_bar.check_mcollision()
@@ -150,10 +150,11 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
             
         # Dream log save button
         elif tab_view.dream_log_view.save_button.check_mcollision():
-                tab_view.dream_log_view.save_dream()
-                tab_view.dream_log_view.dream_input.text = ""
-                tab_view.dream_log_view.dream_title.text = ""
-                tab_view.dream_log_view.date_input.text = ""
+                result = tab_view.dream_log_view.save_dream()
+                if result:
+                    tab_view.dream_log_view.dream_input.text = ""
+                    tab_view.dream_log_view.dream_title.text = ""
+                    tab_view.dream_log_view.date_input.text = ""
                 return
 
         # Dream log remove button
@@ -179,7 +180,8 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
         if item:
             tab_view.dream_log_view.dream_input.text = item.data
             tab_view.dream_log_view.dream_title.text = item.title
-            tab_view.dream_log_view.date_input.text = item.date_dreamt
+            tab_view.dream_log_view.date_input.text = "".join(item.date_dreamt.split("/"))
+            tab_view.dream_log_view.date_input.cursor_position = 8
             return
 
     # Check for settings' checkboxes
@@ -189,7 +191,7 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
             if box.check_mcollision():
                 box.active = not box.active
                 tab_view.settings_view.data[box.value] = box.active
-            return
+                return
 
 def handle_mouse_scroll(tab_view: TabContainer, event):
     if tab_view.view == "Dream Log":

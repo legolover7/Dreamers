@@ -1,19 +1,21 @@
-import pygame as pyg
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
 from common.modules.collider import collides_point
 
 class ListContent:
-    def __init__(self, title: str, date_dreamed: str, date_entered: str, data=""):
+    def __init__(self, title: str, date_dreamt: str, date_modified: str, data=""):
         self.title = title 
-        self.date_dreamed = date_dreamed
-        self.date_entered = date_entered
+        self.date_dreamt = date_dreamt
+        self.date_modified = date_modified
         self.rect = ()
         self.data = data
 
     def draw(self, window, rect, type):
-        if self.rect == ():
+        if self.rect != rect:
             self.rect = rect
 
         color = Colors.gray if self.check_mcollision() else Colors.dark_gray
@@ -26,7 +28,7 @@ class ListContent:
 
         window.blit(Fonts.font_20.render(self.title, True, Colors.white), (rect[0] + 2, rect[1] + 2))
         char_height = Fonts.font_20.size("A")[1]
-        window.blit(Fonts.font_18.render("Date of Dream: " + self.date_dreamed + " | Date Modified: " + self.date_entered, True, Colors.lighter_gray), (rect[0] + 2, rect[1] + char_height + 2))
+        window.blit(Fonts.font_18.render("Date of Dream: " + self.date_dreamt + " | Date Modified: " + self.date_modified, True, Colors.lighter_gray), (rect[0] + 2, rect[1] + char_height + 2))
 
     def check_mcollision(self):
         if self.rect == ():

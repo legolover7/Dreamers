@@ -1,7 +1,9 @@
 # Import statements
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
-import pygame as pyg
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 import pyperclip
 import json
 import sys

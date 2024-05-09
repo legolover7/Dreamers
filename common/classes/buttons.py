@@ -1,5 +1,6 @@
-import pygame as pyg
-pyg.init()
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
@@ -101,25 +102,30 @@ class Checkbox:
             return collider.collides_point(Globals.mouse_position, (self.x, self.y + offset, self.width, self.height))
 
 class Dropdown:
-    def __init__(self, rect, font, color, options, text_color):
+    def __init__(self, rect: tuple, font: pyg.font.Font, color: tuple, options: list[str], text_color: tuple):
         self.x, self.y, self.width, self.height = rect
         self.color = color
         self.options = options
         self.font = font
         self.text_color = text_color
         self.active = False
-        self.selected = options[0]
+        self.selected_option = options[0]
 
-    def draw(self, window):
+    def draw(self, window: pyg.Surface):
+        """Draws the dropdown based on whether it's active or not"""
+        # Dropdown shown
         if self.active:
             back_color = [self.color[i] * 0.8 for i in range(len(self.color))]
             highlight_color = [self.color[i] * 1.2 for i in range(len(self.color))]
+
+            char_height = self.font.size("A")[1]
             # Draw background
-            pyg.draw.rect(window, self.color, (self.x-2, self.y-2, self.width, self.height + (24 * len(self.options))), border_radius=5)
+            pyg.draw.rect(window, self.color, (self.x-2, self.y-2, self.width, self.height + (char_height + 2) * len(self.options) + 4), border_radius=5)
+            
             # Draw currently selected option
-            text_width, text_height = self.font.size(self.selected)
+            text_width, text_height = self.font.size(self.selected_option)
             vertical_offset = self.y + (self.height - text_height)/2
-            window.blit(self.font.render(self.selected, True, self.text_color), (self.x + (self.width - text_width - 20)/2, vertical_offset))
+            window.blit(self.font.render(self.selected_option, True, self.text_color), (self.x + (self.width - text_width - 20)/2, vertical_offset))
             vertical_offset += text_height + 2
             pyg.draw.rect(window, back_color, (self.x, vertical_offset, self.width - 4, 2))
             vertical_offset += 4
@@ -133,14 +139,14 @@ class Dropdown:
                     
                 window.blit(self.font.render(option, True, self.text_color), (self.x + (self.width - text_width - 20)/2, vertical_offset))
                 vertical_offset += text_height + 2
-
+        # Just the selected item
         else:
             color = self.color
             if self.check_mcollision():
                 color = [self.color[i] * 1.2 for i in range(len(self.color))]
             pyg.draw.rect(window, color, (self.x-2, self.y-2, self.width, self.height), border_radius=5)
-            text_width, text_height = self.font.size(self.selected)
-            window.blit(self.font.render(self.selected, True, self.text_color), (self.x + (self.width - text_width - 20)/2, self.y + (self.height - text_height)/2))
+            text_width, text_height = self.font.size(self.selected_option)
+            window.blit(self.font.render(self.selected_option, True, self.text_color), (self.x + (self.width - text_width - 20)/2, self.y + (self.height - text_height)/2))
 
             # Draw down arrow
             pyg.draw.line(window, self.text_color, (self.x + self.width - 20, self.y + 8), (self.x + self.width - 15, self.y + self.height - 12), 1)
@@ -151,21 +157,22 @@ class Dropdown:
         return collider.collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
     
     def click(self):
-        if not self.active and self.check_mcollision():
-            self.active = True
-        else:
-            self.active = False
-            if self.check_mcollision():
-                return
-
-            # Calculate starting position
-            text_height = self.font.size(self.selected)[1]
-            vertical_offset = self.y + (self.height - text_height)/2 + text_height + 6
-            # Check if a given option was selected
-            for option in self.options:
-                text_height = self.font.size(option)[1]
-                # Highlight hovered option
-                if collider.collides_point(Globals.mouse_position, (self.x, vertical_offset - 2, self.width - 8, text_height + 4)):
-                    self.selected = option
-                    return option
-                vertical_offset += text_height + 2
+        """Simulates a click and returns true if it was clicked, the option if it was active and an option was clicked, and None otherwise"""
+        if self.check_mcollision():
+            self.active = not self.active
+            return True
+        
+        if not self.active: return
+        
+        # Calculate starting position
+        text_height = self.font.size(self.selected_option)[1]
+        vertical_offset = self.y + (self.height - text_height)/2 + text_height + 6
+        # Check if a given option was selected
+        for option in self.options:
+            text_height = self.font.size(option)[1]
+            # Highlight hovered option
+            if collider.collides_point(Globals.mouse_position, (self.x, vertical_offset - 2, self.width - 8, text_height + 4)):
+                self.selected_option = option
+                self.active = False
+                return option
+            vertical_offset += text_height + 2

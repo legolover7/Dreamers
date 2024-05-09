@@ -1,4 +1,6 @@
-import pygame as pyg
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 import sys
 import os
 
@@ -86,7 +88,7 @@ def Quit(tab_view: TabContainer):
 
     dream_data = {"dreams": []}
     for dream in tab_view.dream_log_view.list_container.contents:
-        dream_data["dreams"].append({"title": dream.title, "date_dreamed": dream.date_dreamed, "date_entered": dream.date_entered, "data": dream.data})
+        dream_data["dreams"].append({"title": dream.title, "date_dreamed": dream.date_dreamt, "date_modified": dream.date_modified, "data": dream.data})
         
     s_handler.save_dreams(dream_data)
 

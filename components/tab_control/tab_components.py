@@ -1,4 +1,7 @@
-import pygame as pyg
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
+import datetime
 import copy
 import json
 import time
@@ -281,6 +284,9 @@ class DreamLogView:
         self.date_input = InputField((self.x + 450, self.y + self.height / 2 - 60, 200, 30), Fonts.font_20, "Date of dream", scrollable=True, center_text=False)
         self.save_button = Button((self.x + 700, self.y + self.height / 2 - 65, 150, 40), Colors.green, "Save Dream", Fonts.font_20, Colors.white)
         self.delete_button = Button((self.x + 700, self.y + self.height / 2, 150, 40), Colors.red, "Remove Dream", Fonts.font_20, Colors.white)
+
+        # Filter drowdown
+        self.sort_dropdown = Dropdown((self.x + 448, self.y + self.height/2, 180, 25), Fonts.font_18, Colors.dark_gray, ["Select a filter", "Date Modified", "Date Dreamt", "Alpha (A-Z)", "Alpha (Z-A)"], Colors.white)
         
         self.list_container = ListContainer((self.x + 20, self.y + self.height / 2 + 30, self.width * 2 / 3, self.height / 2 - 40))
         # Get saved dreams
@@ -288,7 +294,7 @@ class DreamLogView:
             with open(FilePaths.logs, "r") as infile:
                 data = json.load(infile)["dreams"]
                 for log in data:
-                    self.list_container.contents.append(ListContent(log["title"], log["date_dreamed"], log["date_entered"], log["data"]))
+                    self.list_container.contents.append(ListContent(log["title"], log["date_dreamed"], log["date_modified"], log["data"]))
 
     def draw(self, window):
         self.dream_input.draw(window)
@@ -297,6 +303,7 @@ class DreamLogView:
         self.save_button.draw(window)
         self.delete_button.draw(window)
         self.list_container.draw(window)
+        self.sort_dropdown.draw(window)
 
         window.blit(Fonts.font_24.render("Saved Dreams:", True, Colors.white), (self.x + 20, self.y + self.height / 2))
     
@@ -308,7 +315,21 @@ class DreamLogView:
             for item in self.list_container.contents:
                 if item.title == self.dream_title.text:
                     item.data = self.dream_input.text
-                    item.date_entered = current_date
-                    item.date_dreamed = self.date_input.text
+                    item.date_modified = current_date
+                    item.date_dreamt = self.date_input.text
                     return
             self.list_container.contents.append(ListContent(self.dream_title.text, self.date_input.text, current_date, self.dream_input.text))
+
+    def sort_dreams(self, option):
+        """Sorts the saved dreams based on the option provided"""
+        if option == "Alpha (A-Z)":
+            self.list_container.contents.sort(key=lambda dream: dream.title)
+
+        elif option == "Alpha (Z-A)":
+            self.list_container.contents.sort(reverse=True, key=lambda dream: dream.title)
+
+        elif option == "Date Modified":
+            self.list_container.contents.sort(key=lambda dream: datetime.datetime.strptime(dream.date_modified, "%m/%d/%Y"))
+
+        elif option == "Date Dreamt":
+            self.list_container.contents.sort(key=lambda dream: datetime.datetime.strptime(dream.date_dreamt, "%m/%d/%Y"))

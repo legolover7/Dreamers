@@ -1,4 +1,6 @@
-import pygame as pyg
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 
 # Keyboard input for text boxes
 def handler(content, key, key_mods, cursor):

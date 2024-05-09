@@ -1,4 +1,6 @@
-import pygame as pyg
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 import time
 
 class Profiler:

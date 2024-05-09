@@ -1,21 +1,24 @@
-import pygame as pyg
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 import json
 import os
 
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
 from search_engine.classes.results import Result
+from search_engine.modules.save_handler import FilePaths
 
 class ResultsView:
     def __init__(self):
         self.search_results = []
         
         # Read data from search_terms.json
-        if os.path.isfile("./data/search_terms.json"):
-            with open("data/search_terms.json", "r") as file:
+        if os.path.isfile(FilePaths.terms):
+            with open(FilePaths.terms, "r") as file:
                 self.data = json.load(file)["terms"]
         else:
-            with open("data/search_terms.json", "w") as file:
+            with open(FilePaths.terms, "w") as file:
                 file.write(json.dumps({"terms": []}, indent=4))
                 self.data = []
 

@@ -1,5 +1,6 @@
-import pygame as pyg
-pyg.init()
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 
 class Globals:
     # Default size of the application
@@ -30,3 +31,4 @@ class Globals:
 class FilePaths:
     settings = "./data/settings.json"
     logs = "./data/dreams.json"
+    terms = "./data/search_terms.json"

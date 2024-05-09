@@ -1,6 +1,6 @@
-import pygame as pyg
-pyg.init()
-pyg.font.init()
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame as pyg
 
 from common.classes.display import Colors
 from common.classes.globals import Globals

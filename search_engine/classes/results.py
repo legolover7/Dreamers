@@ -15,7 +15,7 @@ class Result:
         self.generated_links = False
         self.selected = selected
 
-    def draw(self, window, offset):
+    def draw(self, window: pyg.Surface, offset: tuple[int, int]):
         """Draws this result, including keyword, description, and related links"""
         keyword, description, related = self.get_data()
         start_offset = offset[1]
@@ -62,18 +62,18 @@ class Result:
                 window.blit(Fonts.font_18.render(rel, True, color), (offset[0] + hori_offset, offset[1]))
                 window.blit(Fonts.font_18.render(comma, True, Colors.dark_white), (offset[0] + hori_offset + Fonts.font_18.size(rel)[0], offset[1]))
                 hori_offset += text_width + Fonts.font_18.size(", ")[0]
-                
             
             offset[1] += text_height
 
         self.height = offset[1] - start_offset
         return offset[1] + 5
     
-    def check_mcollision(self):
+    def check_mcollision(self) -> bool:
         """Returns true if mouse cursor is within this result's bound"""
         return collides_point(Globals.mouse_position, (self.ox-8, self.oy, Globals.WIDTH/2-6, self.height))
 
-    def check_related_click(self):
+    def check_related_click(self) -> str:
+        """Returns the search term of the related link clicked"""
         for link in self.related_links:
             if collides_point(Globals.mouse_position, (link["rect"])):
                 return link["term"]

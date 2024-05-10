@@ -4,7 +4,12 @@ from tkinter.filedialog import askopenfilename
 import contextlib
 with contextlib.redirect_stdout(None):
     import pygame as pyg
-import pyperclip
+try:
+    import pyperclip
+    paste_enabled = True
+except ModuleNotFoundError:
+    paste_enabled = False
+    
 import json
 import sys
 import os
@@ -96,7 +101,7 @@ def Main():
 
                     active_field = fields[index]
 
-                elif key == pyg.K_v and ctrl and active_field != None:
+                elif key == pyg.K_v and ctrl and active_field != None and paste_enabled:
                     active_field.text = pyperclip.paste()
                     Globals.cursor_position = len(active_field.text)
                 else:

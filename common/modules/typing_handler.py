@@ -30,16 +30,15 @@ def handle_ints(content, key, key_mods, cursor):
             content = content[:i] + content[cursor:]
             cursor = i
             content = content[:-1]
-            
     return content, cursor
 
 # Keyboard input for text boxes
 def handler(content, key, key_mods, cursor):
-    '''
+    """
     Edits the given content based on the key(s) pressed
     Parameters: The content to be edited, the event.key from pygame, the current keyboard mods, and the current cursor location
     Returns: The edited content and the adjusted cursor
-    '''
+    """
     shift, caps, ctrl = key_mods
     if cursor > len(content):
         cursor = len(content)

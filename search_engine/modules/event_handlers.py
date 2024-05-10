@@ -135,6 +135,7 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
                 tab_view.dream_log_view.sort_dreams(option)
             return
 
+        # Dream log inputs
         if tab_view.dream_log_view.dream_input.check_mcollision():
             tab_view.dream_log_view.dream_input.active = True
             Globals.cursor_position = len(tab_view.dream_log_view.dream_input.text)
@@ -193,8 +194,7 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
                 tab_view.settings_view.data[box.value] = box.active
                 return
 
-def handle_mouse_scroll(tab_view: TabContainer, event):
+def handle_mouse_scroll(tab_view: TabContainer, event: pyg.event.Event):
     if tab_view.view == "Dream Log":
-
         if tab_view.dream_log_view.dream_input.check_mcollision():
             tab_view.dream_log_view.dream_input.scroll_text_content(-event.y)

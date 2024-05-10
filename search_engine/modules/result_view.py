@@ -22,7 +22,7 @@ class ResultsView:
                 file.write(json.dumps({"terms": []}, indent=4))
                 self.data = []
 
-    def draw(self, window, offset):
+    def draw(self, window: pyg.Surface, offset: tuple[int, int]):
         x, y = offset
         width, height = Globals.WIDTH/2, Globals.HEIGHT
 
@@ -39,7 +39,7 @@ class ResultsView:
 
     def update_search(self, criteria={}):
         """Updates the search contents based on the criteria provided"""
-        self.search_results = []
+        self.search_results: list[Result] = []
         if criteria != {}:
             searched_term = criteria["keyword"].lower()
             type = criteria["type"]
@@ -60,14 +60,15 @@ class ResultsView:
 
             if index != -1:
                 # Add before
-                for i in range(max(0, index - Globals.MAX_RETURN_NUMBER//2), index):
+                for i in range(max(0, index - Globals.MAX_RETURN_NUMBER//2 - 1), index):
                     self.search_results += [Result(self.data[i])]
 
                 # Add item
                 self.search_results += [Result(self.data[index], True)]
+                extra_items = Globals.MAX_RETURN_NUMBER//2 - len(self.search_results) + 2
 
                 # Add after
-                for i in range(index+1, min(len(self.data), index + Globals.MAX_RETURN_NUMBER//2 + 1)):
+                for i in range(index+1, min(len(self.data), index + Globals.MAX_RETURN_NUMBER//2 + extra_items)):
                     self.search_results += [Result(self.data[i])] 
         else:
             # Get the first MAX_RETURN_NUMBER items
@@ -76,7 +77,7 @@ class ResultsView:
                     break
                 self.search_results += [Result(self.data[i])]
 
-    def check_result_clicked(self):
+    def check_result_clicked(self) -> Result:
         """Checks if any of its the view's results were clicked"""
         for result in self.search_results:
             # Check if a related link was clicked, first

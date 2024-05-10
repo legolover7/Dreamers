@@ -1,5 +1,9 @@
 # Folders
 /data/
+/dist/
+/build/
+/**/__pycache__/
 
 # Files
-/**/__pycache__/
+/setup.py
+/control_script.spec

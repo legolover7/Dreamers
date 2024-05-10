@@ -8,15 +8,25 @@ args = sys.argv[1:]
 
 editor_names = ["editor", "ed", "e"]
 engine_names = ["search_engine", "se", "s"]
+x = ""
+
+if not os.path.exists("./data"):
+    print("Making data folder")
+    os.mkdir("./data")
 
 if len(args) == 0:
-    print("Please enter a command! Available commands:")
+    print("Please enter a command. Available commands:")
     print("To open the editor:", editor_names, "To open the search engine:", engine_names)
-    print("Correct usage: python control_script.py <arguments> <command>")
-    sys.exit()
+    x = input(">> ")
 
 import editor.editor as editor
 import search_engine.search_engine as search_engine
+
+if x != "":
+    if x in editor_names:
+        editor.Main()
+    elif x in engine_names:
+        search_engine.Main()
 
 # Check arguments
 if "-h" in args:

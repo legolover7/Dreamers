@@ -247,9 +247,9 @@ class SettingsView:
                 self.data = json.load(file)
 
         # Settings' tooltips
-        fps_tt = ToolTip("Determines whether or not the FPS (Frames per Second) of the application is displayed.", Globals.FPS/2, 600)
-        save_ttp = ToolTip("Determines whether or not search queries are saved.", Globals.FPS/2, 600)
-        cfld_ttp = ToolTip("Determines whether or not the confirmation popup for the dream log deletion is shown.", Globals.FPS/2, 600)
+        fps_tt = ToolTip("Determines whether or not the FPS (Frames per Second) of the application is displayed.", Globals.FPS/2, 550)
+        save_ttp = ToolTip("Determines whether or not search queries are saved.", Globals.FPS/2, 550)
+        cfld_ttp = ToolTip("Determines whether or not the confirmation popup for the dream log deletion is shown.", Globals.FPS/2, 550)
 
         # Settings
         self.boxes = {

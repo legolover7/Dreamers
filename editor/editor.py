@@ -17,7 +17,7 @@ import os
 # Custom modules
 from common.classes.buttons import Button, Checkbox
 from common.classes.display import Colors, Fonts
-from common.classes.globals import Globals
+from common.classes.globals import Globals, FilePaths
 from common.classes.input_field import InputField
 
 import common.modules.typing_handler as typing_handler
@@ -57,6 +57,11 @@ def Main():
     error_message = ""
     error_timeout = 0
     index = -1
+
+    # Make sure term file exists
+    if not os.path.isfile(FilePaths.terms):
+        with open(FilePaths.terms, "w") as file:
+            file.write(json.dumps({"terms": []}, indent=4))
 
     while True:
         text_lines = chunk_text.chunk(description_input.text, content_width=description_input.width-5, char_width=description_input.font.size("A")[0])
@@ -152,14 +157,14 @@ def Main():
                 if merge_button.check_mcollision():
                     filename = askopenfilename()
                     outdata = {}
-                    with open("data/search_terms.json", "r") as outfile, open(filename, "r") as infile:
+                    with open(FilePaths.terms, "r") as outfile, open(filename, "r") as infile:
                         outdata = json.load(outfile)
                         indata = json.load(infile)
                         for item in indata["terms"]:
                             if item not in outdata["terms"]:
                                 outdata["terms"] += [item]
 
-                    with open("data/search_terms.json", "w") as file:
+                    with open(FilePaths.terms) as file:
                         file.write(json.dumps(outdata, indent=4))              
                         
         Globals.cursor_frame = min(Globals.cursor_timeout * Globals.FPS + 1, Globals.cursor_frame + 1)

@@ -8,7 +8,7 @@ from common.modules.collider import collides_point
 from common.modules.chunk_text import chunk
 
 class InputField():
-    def __init__(self, rect, font, default_text="Enter text", increases_upwards=False, title="", title_font=None, scrollable=False, center_text=True):
+    def __init__(self, rect, font: pyg.font.Font, default_text="Enter text", increases_upwards=False, title="", title_font: pyg.font.Font=None, scrollable=False, center_text=True):
         self.x, self.y, self.width, self.height = rect
         self.default_text = default_text
         self.font = font
@@ -21,7 +21,7 @@ class InputField():
         self.scroll_offset = 0
         self.center_text = center_text
 
-    def draw(self, window, active=None, offset=0):
+    def draw(self, window: pyg.Surface, active=None, offset=0):
         # Get the field's text content and set its correct color
         text = self.text if self.text != "" or self == active else self.default_text
         color = Colors.white if self.text != "" else Colors.lighter_gray

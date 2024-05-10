@@ -268,6 +268,9 @@ class SettingsView:
         text_width, text_height = Fonts.font_20.size("I wouldn't have been able to complete this project.")
         window.blit(Fonts.font_20.render("I wouldn't have been able to complete this project.", True, Colors.gray), (self.x + (self.width - text_width) / 2, self.y + self.height - text_height - 2))
 
+        window.blit(Fonts.font_20.render("v" + Globals.VERSION_NUMBER, True, Colors.gray), (self.x + 5, self.y + self.height - 24))
+
+        # Draw checkboxes
         for box in self.boxes:
             if self.boxes[box].tooltip != None and self.boxes[box].tooltip.current_delay >= self.boxes[box].tooltip.min_delay:
                 self.boxes[box].tooltip.draw(window, (self.boxes[box].x, self.boxes[box].y + self.boxes[box].height))

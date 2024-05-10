@@ -46,12 +46,13 @@ def Main():
     verb_box = Checkbox((650, 710, 20, 20), "Verb", Fonts.font_20)
     noun_box = Checkbox((750, 710, 20, 20), "Noun", Fonts.font_20)
     adjective_box = Checkbox((900, 710, 20, 20), "Adjective", Fonts.font_20)
+    name_box = Checkbox((1050, 710, 20, 20), "Name/Place", Fonts.font_20)
 
     save_button = Button((Globals.WIDTH/2-100, Globals.HEIGHT-100, 200, 40), Colors.blue, "Save", Fonts.font_24, Colors.white)
     merge_button = Button((20, 20, 150, 30), Colors.aqua, "Merge Files", Fonts.font_24, Colors.black)
 
     fields = [keyword_input, page_input, description_input, related_input, category_input, links_input, ref_input]
-    boxes = [verb_box, noun_box, adjective_box]
+    boxes = [verb_box, noun_box, adjective_box, name_box]
     buttons = [save_button, merge_button]
     active_field = None
     error_message = ""
@@ -156,16 +157,23 @@ def Main():
                 # Merge data files
                 if merge_button.check_mcollision():
                     filename = askopenfilename()
-                    outdata = {}
-                    with open(FilePaths.terms, "r") as outfile, open(filename, "r") as infile:
-                        outdata = json.load(outfile)
-                        indata = json.load(infile)
-                        for item in indata["terms"]:
-                            if item not in outdata["terms"]:
-                                outdata["terms"] += [item]
+                    if filename:
+                        outdata = {}
+                        write = True
+                        with open(FilePaths.terms, "r") as outfile, open(filename, "r") as infile:
+                            outdata = json.load(outfile)
+                            try:
+                                indata = json.load(infile)
+                                for item in indata["terms"]:
+                                    if item not in outdata["terms"]:
+                                        outdata["terms"] += [item]
+                            except (UnicodeDecodeError, json.decoder.JSONDecodeError):
+                                write = False
 
-                    with open(FilePaths.terms) as file:
-                        file.write(json.dumps(outdata, indent=4))              
+                        # Don't write if the read operation failed
+                        if write:
+                            with open(FilePaths.terms, "w") as file:
+                                file.write(json.dumps(outdata, indent=4))
                         
         Globals.cursor_frame = min(Globals.cursor_timeout * Globals.FPS + 1, Globals.cursor_frame + 1)
         error_timeout = max(0, error_timeout - 1)
@@ -175,7 +183,7 @@ def Main():
 
 def SaveWord(fields, boxes):
     keyword_input, page_input, description_input, related_input, category_input, links_input, ref_input = fields
-    verb_box, noun_box, adjective_box = boxes
+    verb_box, noun_box, adjective_box, name_box = boxes
 
     if keyword_input.text == "":
         return "No keyword"
@@ -209,6 +217,7 @@ def SaveWord(fields, boxes):
         "is_verb": verb_box.active,
         "is_noun": noun_box.active,
         "is_adjective": adjective_box.active,
+        "is_name": name_box.active,
     }
 
     data = ""

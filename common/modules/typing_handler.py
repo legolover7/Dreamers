@@ -33,7 +33,7 @@ def handle_ints(content, key, key_mods, cursor):
     return content, cursor
 
 # Keyboard input for text boxes
-def handler(content, key, key_mods, cursor):
+def handler(content, key, key_mods, cursor, allow_enter=False):
     """
     Edits the given content based on the key(s) pressed
     Parameters: The content to be edited, the event.key from pygame, the current keyboard mods, and the current cursor location
@@ -77,6 +77,10 @@ def handler(content, key, key_mods, cursor):
         char = " " 
         cursor += 1
 
+    elif key == pyg.K_RETURN and allow_enter:
+        char = "\n\r"
+        cursor += 1
+
     content = content[:cursor-1] + char + content[cursor-1:]
 
     # Ctrl+Shift+Backspace == delete all content
@@ -94,7 +98,7 @@ def handler(content, key, key_mods, cursor):
             content += " " 
             for i in range(cursor, 0, -1):
                 i -= 1
-                if content[i] == " ":
+                if content[i] == " " or content[i] == "\n":
                     break
             content = content[:i] + content[cursor:]
             cursor = i
@@ -106,7 +110,7 @@ def handler(content, key, key_mods, cursor):
             content = content[:cursor] + content[cursor+1:]
         else:
             for i in range(cursor, len(content)):
-                if content[i] == " ":
+                if content[i] == " " or content[i] == "\r":
                     break
             content = content[:cursor] + content[i+1:]
 

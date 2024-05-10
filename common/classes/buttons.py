@@ -15,16 +15,16 @@ class Button:
         self.font = font
         self.text_color = text_color
 
-    def draw(self, window, offset=0):
+    def draw(self, window):
         back_color = [self.color[i] * 0.8 for i in range(len(self.color))]
         
         if not self.check_mcollision():
-            pyg.draw.rect(window, back_color, (self.x+2, self.y+2 + offset, self.width, self.height), border_radius=5)
+            pyg.draw.rect(window, back_color, (self.x+2, self.y+2, self.width, self.height), border_radius=5)
         color = back_color if self.check_mcollision() else self.color
-        pyg.draw.rect(window, color, (self.x, self.y + offset, self.width, self.height), border_radius=5)
+        pyg.draw.rect(window, color, (self.x, self.y, self.width, self.height), border_radius=5)
 
         text_width, text_height = self.font.size(self.text)
-        window.blit(self.font.render(self.text, True, self.text_color), (self.x + (self.width - text_width)/2, self.y + (self.height - text_height)/2 + offset))
+        window.blit(self.font.render(self.text, True, self.text_color), (self.x + (self.width - text_width)/2, self.y + (self.height - text_height)/2))
 
     def check_mcollision(self):
         return collider.collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
@@ -69,22 +69,22 @@ class Checkbox:
         self.value = value
         self.tooltip = tooltip
     
-    def draw(self, window, offset=0):
+    def draw(self, window):
         color = Colors.green if self.active else Colors.gray
 
         text_width = self.font.size(self.text)[0]
         content_width = text_width + self.width
 
         if self.left_align:
-            window.blit(self.font.render(self.text, True, Colors.white), (self.x, self.y + offset))
+            window.blit(self.font.render(self.text, True, Colors.white), (self.x, self.y))
 
-            pyg.draw.rect(window, Colors.gray, (self.x + text_width + 9, self.y - 1 + offset, self.width+2, self.height+2), border_radius=2)
-            pyg.draw.rect(window, color, (self.x + text_width + 10, self.y + offset, self.width, self.height), border_radius=2)
+            pyg.draw.rect(window, Colors.gray, (self.x + text_width + 9, self.y - 1, self.width+2, self.height+2), border_radius=2)
+            pyg.draw.rect(window, color, (self.x + text_width + 10, self.y, self.width, self.height), border_radius=2)
         else:
-            pyg.draw.rect(window, Colors.gray, (self.x-1, self.y-1 + offset, self.width+2, self.height+2), border_radius=2)
-            pyg.draw.rect(window, color, (self.x, self.y + offset, self.width, self.height), border_radius=2)
+            pyg.draw.rect(window, Colors.gray, (self.x-1, self.y-1, self.width+2, self.height+2), border_radius=2)
+            pyg.draw.rect(window, color, (self.x, self.y, self.width, self.height), border_radius=2)
 
-            window.blit(self.font.render(self.text, True, Colors.white), (self.x - text_width -6, self.y + offset))
+            window.blit(self.font.render(self.text, True, Colors.white), (self.x - text_width -6, self.y))
 
         # Show tooltip on hover
         if self.tooltip != None:
@@ -93,13 +93,13 @@ class Checkbox:
             else:
                 self.tooltip.current_delay = min(self.tooltip.min_delay, self.tooltip.current_delay + 1)
 
-    def check_mcollision(self, offset=0):
+    def check_mcollision(self):
         if self.left_align:
             text_width = self.font.size(self.text)[0]
-            return collider.collides_point(Globals.mouse_position, (self.x + text_width + 10, self.y + offset, self.width, self.height))
+            return collider.collides_point(Globals.mouse_position, (self.x + text_width + 10, self.y, self.width, self.height))
 
         else:
-            return collider.collides_point(Globals.mouse_position, (self.x, self.y + offset, self.width, self.height))
+            return collider.collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
 
 class Dropdown:
     def __init__(self, rect: tuple, font: pyg.font.Font, color: tuple, options: list[str], text_color: tuple):

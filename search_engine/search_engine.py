@@ -68,6 +68,11 @@ def Main():
                         Globals.cursor_position = 0
                         results_view.update_search({"keyword": search, "type": "contains"})
 
+                elif key == pyg.K_PAGEDOWN and tab_view.dream_log_view.dream_input.active:
+                    tab_view.dream_log_view.dream_input.scroll_content(0, "max")
+                elif key == pyg.K_PAGEUP and tab_view.dream_log_view.dream_input.active:
+                    tab_view.dream_log_view.dream_input.scroll_content(0, "min")
+
                 else:
                     ev_handlers.handle_input(key, (shift, caps, ctrl), tab_view)
 
@@ -79,6 +84,7 @@ def Main():
             elif event.type == pyg.MOUSEWHEEL:
                 ev_handlers.handle_mouse_scroll(tab_view, event)
 
+        Globals.cursor_frame = min(Globals.cursor_timeout * Globals.FPS + 1, Globals.cursor_frame + 1)
         draw.draw(results_view, tab_view, tab_bar, profiler)
         Globals.clock.tick(Globals.FPS)
 

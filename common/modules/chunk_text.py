@@ -1,85 +1,75 @@
-# Function that splits up a string, returning a list of chunks that are no more than the given max_length
-def chunk(text, max_length=0, content_width=0, char_width=0):
-    '''
-    Chunks provided text into sub slices based on the max_length variable
-    Parameters: The text to be chunked, an integer max_length to chop to a specific size, content_width and char_size which calculates into max_length
-    Returns: A list with strings that are less than or equal to max_length in size
-    '''
-    if len(text) == 0:
-        return []
-    if content_width != 0 and char_width != 0:
-        try:
-            max_length = content_width // char_width
-        except:
-            return [text]
+def chunk(text: str, max_length: int=0, content_width: int=0, char_width: int=0):
+    """Splits a line of text into a list of strings that are at most max_length in size.
     
-    if text == " ":
-        return [" "]
+        If max_length isn't supplied but content_width and char_width are,
+        it will calculate max_length as (content_width // char_width - 1).
+    """
+    if len(text) == 0 or text == " ":
+        return [text]
     
-    begin_spc = False
-    char = False
-    if text[0] == " ":
-        begin_spc = True
-    text_list = []
-    out_list = []
+    # Calculate maximum length based on params
+    if max_length == 0:
+        max_length = content_width // char_width - 1
 
-    tail = 0    
-    # Split text on spaces
-    for head in range(len(text)):
-        if text[head] == " " and char or head == len(text)-1:
-            text_list += [text[tail:head+1]]
-            tail = head
-            char = False
+    max_length = int(max_length)
+
+    words = text.split(" ")
+    output = [""]
+
+    while len(words) > 0:
+        current_word = words[0]
+        # This word and the previous string fits
+        if len(current_word) + len(output[-1]) < max_length:
+            # Join by a space only if this isn't the first word we've added
+            space = " " if output[-1] != "" else ""
+            output[-1] = output[-1] + space + current_word
+            words.pop(0)
+
+        # This word doesn't fit, but is less than max_length
+        elif len(current_word) <= max_length:
+            try:
+                if output[-1][-1] == "\t":
+                    output[-1] = output[-1][:-1]
+                elif output[-1][-1] != " ":
+                    output[-1] = output[-1] + " "
+            except IndexError:
+                pass
+            output.append(current_word)
+            words.pop(0)
+
+        # This word doesn't fit and it's longer than max_length
         else:
-            char = True
+            try:
+                if output[-1][-1] != " ":
+                    output[-1] = output[-1] + " "
+            except IndexError:
+                pass
+            output.append(current_word[:max_length] + "\t")
+            words[0] = current_word[max_length:]
         
-    # Consolidate spaces and remove preceding ones
-    index = 0
-    while index != len(text_list):
-        if len(text_list[index]) > 0:
-            if text_list[index] == " ":
-                text_list[index-1] += " "
-                text_list.pop(index)
-                index -= 1
-        if len(text_list[index]) > 1 and text_list[index][0] == " ":
-            text_list[index] = text_list[index][1:]
-        index += 1
+    return output
 
-    temp = (" " if begin_spc else "") + text_list.pop(0)
+def split_lines(text):
+    """Splits text on newline characts"""
 
-    if len(temp) > max_length:
-        text_list.insert(0, temp[max_length:])
-        temp = temp[:max_length]
-
-    # Loop while list not empty
-    while len(text_list) > 1:
-        # Can fit both strings (add a space between)
-        if len(temp + text_list[0] + text_list[1]) <= max_length:
-            temp += text_list.pop(0)
-        # Can only fit the current string (no space)
-        elif len(temp + text_list[0]) <= max_length:
-            temp += text_list.pop(0)
-            out_list += [temp]
-            temp = text_list.pop(0)
-        # New line
+    output = []
+    counter = 0
+    while counter < len(text):
+        if text[counter] == "\n":
+            output.append(text[:counter])
+            if len(output) > 1:
+                output[-1] = output[-1].replace("\r", "")
+                output[-1] = "\r" + output[-1]
+            text = "\r" + text[counter+1:]
+            counter = 0
         else:
-            out_list += [temp]
-            temp = text_list.pop(0)
+            counter += 1
 
-    # Final formatting
-    if len(text_list) > 0:
-        if len(temp + text_list[0]) < max_length:
-            temp += text_list[0]
-            out_list += [temp]
-        else:
-            out_list += [temp]
-            out_list += [text_list[0]]
-    else:
-        temp = temp
-        while len(temp) > max_length:
-            out_list += [temp[:max_length]]
-            temp = temp[max_length:]
-        out_list += [temp]
+    output.append(text)
+    if len(output) > 1:
+        output[-1] = output[-1].replace("\r", "")
+        output[-1] = "\r" + output[-1]
 
-    return out_list
+    return output
 
+string = "I am doing some expiremental tests and I need to know if this works"

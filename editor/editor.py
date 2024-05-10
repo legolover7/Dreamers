@@ -18,7 +18,7 @@ import os
 from common.classes.buttons import Button, Checkbox
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals, FilePaths
-from common.classes.input_field import InputField
+from common.classes.input_field import *
 
 import common.modules.typing_handler as typing_handler
 import common.modules.chunk_text as chunk_text
@@ -35,18 +35,18 @@ def Main():
     os.system("cls")
 
     # Various buttons and fields
-    keyword_input = InputField((600, 150, 400, 30), Fonts.font_20, "Enter Keyword", title="Keyword(s)", title_font=Fonts.font_24)
-    page_input = InputField((1100, 150, 220, 30), Fonts.font_20, "Enter Page Number", title="Page Number", title_font=Fonts.font_24)
-    description_input = InputField((600, 250, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Description", title="Description", title_font=Fonts.font_24)
-    related_input = InputField((600, 350, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Terms", title="Related Search Terms", title_font=Fonts.font_24)
-    category_input = InputField((600, 450, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Categories", title="Categories", title_font=Fonts.font_24)
-    links_input = InputField((600, 550, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter Links", title="Links to Definition of", title_font=Fonts.font_24)
-    ref_input = InputField((600, 650, Globals.WIDTH-1200, 30), Fonts.font_20, "Enter References", title="References", title_font=Fonts.font_24)
+    keyword_input     = IFBlock((600, 150, 400, 30),                 "Enter Keyword",          Fonts.font_20)
+    page_input        = IFBlock((1100, 150, 220, 30),                "Enter Page Number",      Fonts.font_20)
+    description_input = IFBlock((600, 200, Globals.WIDTH-1200, 230), "Enter Description",      Fonts.font_20)
+    related_input     = IFBlock((600, 450, Globals.WIDTH-1200, 30),  "Enter Related Terms",    Fonts.font_20)
+    category_input    = IFBlock((600, 500, Globals.WIDTH-1200, 30),  "Enter Categories",       Fonts.font_20)
+    links_input       = IFBlock((600, 550, Globals.WIDTH-1200, 30),  "Enter Definition Links", Fonts.font_20)
+    ref_input         = IFBlock((600, 600, Globals.WIDTH-1200, 30),  "Enter References",       Fonts.font_20)
 
-    verb_box = Checkbox((650, 710, 20, 20), "Verb", Fonts.font_20)
-    noun_box = Checkbox((750, 710, 20, 20), "Noun", Fonts.font_20)
-    adjective_box = Checkbox((900, 710, 20, 20), "Adjective", Fonts.font_20)
-    name_box = Checkbox((1050, 710, 20, 20), "Name/Place", Fonts.font_20)
+    verb_box = Checkbox((650, 650, 20, 20), "Verb", Fonts.font_20)
+    noun_box = Checkbox((750, 650, 20, 20), "Noun", Fonts.font_20)
+    adjective_box = Checkbox((900, 650, 20, 20), "Adjective", Fonts.font_20)
+    name_box = Checkbox((1050, 650, 20, 20), "Name/Place", Fonts.font_20)
 
     save_button = Button((Globals.WIDTH/2-100, Globals.HEIGHT-100, 200, 40), Colors.blue, "Save", Fonts.font_24, Colors.white)
     merge_button = Button((20, 20, 150, 30), Colors.aqua, "Merge Files", Fonts.font_24, Colors.black)
@@ -57,7 +57,7 @@ def Main():
     active_field = None
     error_message = ""
     error_timeout = 0
-    index = -1
+    index = 0
 
     # Make sure term file exists
     if not os.path.isfile(FilePaths.terms):
@@ -65,9 +65,6 @@ def Main():
             file.write(json.dumps({"terms": []}, indent=4))
 
     while True:
-        text_lines = chunk_text.chunk(description_input.text, content_width=description_input.width-5, char_width=description_input.font.size("A")[0])
-        desc_offset = max(10, (len(text_lines)-1) * description_input.font.size("A")[1] + 10)
-
         for event in pyg.event.get():
             Globals.mouse_position[0] = pyg.mouse.get_pos()[0] * (Globals.WIDTH / Globals.WINDOW_WIDTH)
             Globals.mouse_position[1] = pyg.mouse.get_pos()[1] * (Globals.HEIGHT / Globals.WINDOW_HEIGHT)
@@ -87,8 +84,8 @@ def Main():
                 elif key == pyg.K_ESCAPE:
                     active_field = None
 
+                # Save fields to file
                 elif key == pyg.K_RETURN:
-                    # Save fields to file
                     response = SaveWord(fields, boxes)
                     if response == "Saved":
                         for field in fields:
@@ -102,10 +99,12 @@ def Main():
                         error_timeout = Globals.FPS * 3
 
                 elif key == pyg.K_TAB:
+                    Globals.cursor_frame = 0
+                    fields[index].active = False
                     if shift: index = max(0, index - 1)
                     else: index = min(index + 1, len(fields) - 1)
 
-                    active_field = fields[index]
+                    fields[index].active = True
 
                 elif key == pyg.K_v and ctrl and active_field != None and paste_enabled:
                     active_field.text = pyperclip.paste()
@@ -121,24 +120,21 @@ def Main():
                 
                 # Select a field
                 for i in range(len(fields)):
-                    if i > 2:
-                        if fields[i].check_mcollision(desc_offset):
-                            active_field = fields[i]
-                            Globals.cursor_position = len(fields[i].text)
-                            Globals.cursor_frame = 0
-                            index = i
-                            break
-                    else:
-                        if fields[i].check_mcollision():
-                            active_field = fields[i]
-                            Globals.cursor_position = len(fields[i].text)
-                            Globals.cursor_frame = 0
-                            index = i
-                            break
+                    fields[i].active = False
+                    if fields[i].check_mcollision():
+                        fields[i].active = True
+                        Globals.cursor_position = len(fields[i].text)
+                        Globals.cursor_frame = 0
+                        index = i
+                        break
 
                 for box in boxes:
-                    if box.check_mcollision(desc_offset):
+                    if box.check_mcollision():
                         box.active = not box.active
+
+                for field in fields:
+                    if field.active:
+                        active_field = field
 
                 # Save fields to file
                 if save_button.check_mcollision():
@@ -178,7 +174,7 @@ def Main():
         Globals.cursor_frame = min(Globals.cursor_timeout * Globals.FPS + 1, Globals.cursor_frame + 1)
         error_timeout = max(0, error_timeout - 1)
 
-        draw.draw(fields, boxes, buttons, active_field, desc_offset, error_message, error_timeout)
+        draw.draw(fields, boxes, buttons, error_message, error_timeout)
         Globals.clock.tick(Globals.FPS)
 
 def SaveWord(fields, boxes):

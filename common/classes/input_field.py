@@ -2,84 +2,196 @@ import contextlib
 with contextlib.redirect_stdout(None):
     import pygame as pyg
 
-from common.classes.display import Colors, Fonts
+from common.classes.display import Colors, Fonts, ColorScheme
 from common.classes.globals import Globals
-from common.modules.collider import collides_point
-from common.modules.chunk_text import chunk
+import common.modules.collider as collider
+import common.modules.chunk_text as chunk_text
 
-class InputField():
-    def __init__(self, rect, font: pyg.font.Font, default_text="Enter text", increases_upwards=False, title="", title_font: pyg.font.Font=None, scrollable=False, center_text=True):
+class IFBase:
+    """The base/parent class of all Input Fields
+    
+    Attributes:
+        x, y: Integer values of where the field is located on the screen
+        width, height: Integer values of how large the field is
+        default_text: The text that gets shown if no text is entered into the field
+        font: The font of the text that is displayed
+        
+        display_surface: The surface that this field is drawn to, then which is drawn to the screen
+
+        bg_color, self.bdr_color: The background and border color of this field
+        border_radius: The border radius of the field
+        border_size: How large the size of the border is
+        text_spacing: The additional spacing between lines of text
+        line_spacing: The total space between lines of text
+        char_width: The width of a single character
+    """
+    def __init__(self, rect: pyg.Rect, default_text: str, font: pyg.font.Font):
+        # Set params
         self.x, self.y, self.width, self.height = rect
         self.default_text = default_text
-        self.font = font
-        self.text = ""
-        self.increases_upwards = increases_upwards
-        self.title = title
-        self.title_font = title_font
-        self.active = False
-        self.scrollable = scrollable
-        self.scroll_offset = 0
-        self.center_text = center_text
+        self.text_font = font
 
-    def draw(self, window: pyg.Surface, active=None, offset=0):
-        # Get the field's text content and set its correct color
-        text = self.text if self.text != "" or self == active else self.default_text
-        color = Colors.white if self.text != "" else Colors.lighter_gray
+        self.display_surface = pyg.Surface((self.width, self.height))
 
-        if self.title != "":
-            text_height = self.title_font.size(self.title)[1]
-            window.blit(self.title_font.render(self.title, True, Colors.white), (self.x, self.y - text_height - 4 + offset))
+        # Set defaults
+        self.bg_color = ColorScheme.field_background_color
+        self.bdr_color = ColorScheme.field_border_color
+        self.border_radius = 8
+        self.border_size = 2
+        self.text_spacing = 1
+        self.line_spacing = self.text_font.size("A")[1] + self.text_spacing
+        self.char_width = self.text_font.size(" ")[0]
 
-        # Split the field's text content by the maximum amount of character able to fit on a single line
-        text_lines = chunk(text, content_width=self.width-5, char_width=self.font.size("|")[0])
-        # Calculate the extra height that the field should be to account for multiple lines of text
-        extra_height = max(0, (len(text_lines) - 1) * (self.font.size("A")[1] + 2))
-        if self.scrollable: extra_height = 0
-        
-        # Display background
-        pyg.draw.rect(window, Colors.gray, (self.x, self.y - (extra_height if self.increases_upwards else 0) + offset, self.width, self.height + extra_height), border_radius=5)
-        pyg.draw.rect(window, Colors.dark_gray, (self.x+2, self.y+2 - (extra_height if self.increases_upwards else 0) + offset, self.width-4, self.height-4 + extra_height), border_radius=5)
-        
-        # Display the lines of text
-        vertical_offset = -extra_height if self.increases_upwards else 0
-        vertical_offset -= self.scroll_offset
-        cursor_position = Globals.cursor_position
-        
-        # Displays cursor if the length of the message is 0
-        if len(text_lines) == 0 and (Globals.cursor_frame > Globals.cursor_timeout or (Globals.cursor_frame % Globals.cursor_period < Globals.cursor_period / 2)):
-            text_height = self.font.size("A")[1]
-            pyg.draw.rect(window, Colors.white, (self.x + 4, self.y + vertical_offset + (self.height - text_height)/2 + offset, 2, text_height))
+    def draw_rect(self):
+        """Draws the background/base of this input field"""
+        self.display_surface.fill(ColorScheme.background_color)
+        pyg.draw.rect(self.display_surface, self.bdr_color, (0, 0, self.width, self.height), border_radius=self.border_radius)
+        pyg.draw.rect(self.display_surface, self.bg_color, (0 + self.border_size, 0 + self.border_size, self.width - self.border_size * 2, self.height - self.border_size * 2), border_radius=self.border_radius)
 
-        for line in text_lines:
-            # Display the current line, and increase the next line's offset
-            text_height = self.font.size(line)[1]
-            window.blit(self.font.render(line, True, color), (self.x + 4, self.y + vertical_offset + ((self.height - text_height)/2 if self.center_text else 5) + offset))
-            
-            # Draw cursor only on the current line
-            if (self == active or self.active) and (Globals.cursor_frame > Globals.cursor_timeout or (Globals.cursor_frame % Globals.cursor_period < Globals.cursor_period / 2)):
-                if cursor_position <= len(line):
-                    text_width = self.font.size(line[:Globals.cursor_position])[0]
-                    pyg.draw.rect(window, Colors.white, (self.x + 4 + (text_width), self.y + vertical_offset + ((self.height - text_height)/2 if self.center_text else 5) + offset, 2, text_height))
-                else:
-                    cursor_position -= len(line)
+    def draw_text_line(self, line: str, position: int, color: tuple = ColorScheme.text_color):
+        """Draws the given line of text to this input field. Doesn't draw if it's off the screen"""
+        if position < -1 or position > self.height / self.line_spacing:
+            return
+        self.display_surface.blit(self.text_font.render(line, True, color), (4, 4 + self.line_spacing * position))
 
-            vertical_offset += text_height + 2
+    def draw_cursor(self, line: str, line_position: int, char_position: int):
+        """Draws the cursor at the given line, offset to the given character position"""
+        if Globals.cursor_frame > Globals.cursor_timeout or (Globals.cursor_frame % Globals.cursor_period < Globals.cursor_period / 2):
+            horizontal_position = 4 + self.text_font.size(line[:char_position])[0]
+            pyg.draw.rect(self.display_surface, Colors.white, (horizontal_position, 4 + line_position * self.line_spacing, 2, self.line_spacing - self.text_spacing * 2))
 
-    def check_mcollision(self, offset=0):
-        return collides_point(Globals.mouse_position, (self.x, self.y + offset, self.width, self.height))
+    def blit_to_screen(self, window: pyg.Surface):
+        """Display this field to the screen"""
+        window.blit(self.display_surface, (self.x, self.y))
+
+    def check_mcollision(self):
+        """Returns true if the mouse cursor is colliding with this field"""
+        return collider.collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
+
+class IFBlock(IFBase):
+    """An Input Field that allows for newline characters and scrolling
     
-    def scroll_text_content(self, direction):
-        """Adjusts the scroll offset for the input field, thereby scrolling the content"""
-        scroll_amount = 10
-        self.scroll_offset += scroll_amount * direction
-        self.scroll_offset = max(0, self.scroll_offset)
-        # Don't scroll if there's space left in the input field
-        lines = chunk(self.text, content_width=self.width-5, char_width=self.font.size("A")[0])
-        char_height = self.font.size("A")[1]
-        if len(lines) < self.height / (char_height + 2):
-            self.scroll_offset = 0
+    Attributes:
+        text: The current contents of the field
+        scroll_offset: An integer representing how many pixels the content has been scrolled
+        scroll_step: An integer representing how much to scroll by
+        active: Whether or not his field is active
+    """
 
-        self.scroll_offset = min(self.scroll_offset, len(lines) * (char_height + 2))
+    def __init__(self, rect: pyg.Rect, default_text: str, font: pyg.font.Font):
+        super().__init__(rect, default_text, font)
+
+        self.text = ""
+        self.scroll_offset = 0
+        self.scroll_step = 0.3
+        self.active = False
+
+
+    def draw(self, window: pyg.Surface):
+        """Draws this Input Field Block"""
+        self.draw_rect()
+
+        if self.text != "":
+            text = self.text
+            text_color = ColorScheme.text_color
+        else:
+            text = self.default_text
+            text_color = ColorScheme.dim_text_color
+
+        self.text_lines = []
+        temp_lines = chunk_text.split_lines(text)
+        
+        # Split the text into individual lines
+        for line in temp_lines:
+            if line == "":
+                self.text_lines += [""]
+            else:
+                self.text_lines += chunk_text.chunk(line, content_width=self.width, char_width=self.char_width)
+        
+        # Display lines
+        cursor_position = Globals.cursor_position
+        drawn_cursor = False
+        for i in range(len(self.text_lines)):
+            current_line = self.text_lines[i]
+            if self.active:
+                # Calculate cursor position
+                if len(current_line) < cursor_position:
+                    cursor_position -= len(current_line)
+                elif not drawn_cursor:
+                    drawn_cursor = True
+                    self.draw_cursor(current_line, i - self.scroll_offset, cursor_position)
+            self.draw_text_line(current_line.replace("\r", ""), i - self.scroll_offset, text_color)
+
+        if len(self.text_lines) > (self.height / self.line_spacing + 3 / self.line_spacing):
+            self.draw_scrollbar()
+
+        self.blit_to_screen(window)
+
+    def scroll_content(self, direction: int, type=""):
+        """Scrolls the content of this field in the given direction. Providing 'max' or 'min' will scroll to the max or min amount, respectively"""
+        # Only allow scrolling if the lines of text go off screen
+        # Min and max height are the minimum and maximum amount that the scrolled text can be offset by
+        min_height, max_height = 0, len(self.text_lines) - (self.height / self.line_spacing) + 4 / self.line_spacing
+        max_height = max(min_height, max_height)
+
+        if type == "max": 
+            self.scroll_offset = max_height
+        elif type == "min":
+            self.scroll_offset = min_height
+        else:
+            self.scroll_offset += self.scroll_step * direction
+            self.scroll_offset = min(max(self.scroll_offset, min_height), max_height)
+
+    def draw_scrollbar(self):
+        max_height = len(self.text_lines) - (self.height / self.line_spacing) + 2 / self.line_spacing
+        ratio = max_height / len(self.text_lines)
+        if self.scroll_offset == 0:
+            travel_percentage = 0
+        else:
+            travel_percentage = self.scroll_offset / len(self.text_lines)
+
+        pyg.draw.rect(self.display_surface, Colors.white, (self.width - 6, 2 + travel_percentage * self.height, 2, self.height * (1 - ratio) - 4))
+
+class IFBox(IFBase):
+    def __init__(self, rect: pyg.Rect, default_text: str, font: pyg.font.Font, max_length = 0):
+        super().__init__(rect, default_text, font)
+
+        self.text = ""
+        self.active = False
+        self.max_length = max_length
+        if max_length == -1:
+            self.max_length = self.width // self.char_width
+        self.max_length = int(self.max_length)
+
+    def draw(self, window: pyg.Surface):
+        self.draw_rect()
+        
+        # Text can't be longer than max_length if not 0
+        if len(self.text) >= self.max_length  and self.max_length != 0:
+            self.text = self.text[:self.max_length - 1]
+            Globals.cursor_position -= 1
+
+        if self.text != "":
+            text = self.text
+            text_color = ColorScheme.text_color
+        else:
+            text = self.default_text
+            text_color = ColorScheme.dim_text_color
+
+        text_lines = chunk_text.chunk(text, max_length=self.max_length)
+
+        cursor_position = Globals.cursor_position
+        for i in range(len(text_lines)):
+            current_line = text_lines[i]
+            if self.active:
+                # Calculate cursor position
+                if len(current_line) < cursor_position:
+                    cursor_position -= len(current_line)
+                else:
+                    self.draw_cursor(current_line, i, cursor_position)
+            self.draw_text_line(current_line, i, text_color)
+
+        self.blit_to_screen(window)
 
 class DateInput:
     def __init__(self, rect: tuple, format: str):
@@ -133,4 +245,4 @@ class DateInput:
                     pyg.draw.line(window, Colors.white, (self.x + 4 + char_width * (cursor_offset + cursor_position), self.y + 4), (self.x + 4 + char_width * (cursor_offset + cursor_position), self.y + self.height - 4))
 
     def check_mcollision(self):
-        return collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
+        return collider.collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))

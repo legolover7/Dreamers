@@ -57,7 +57,6 @@ class ListContainer:
 
             item.draw(window, rect, type)
 
-
     def check_click(self):
         for item in self.contents:
             if item.check_mcollision():

@@ -12,6 +12,7 @@ from components.tab_control.tab_components import Tab, TabBar
 
 def handle_input(key, mods, tab_view: TabContainer):
     shift, caps, ctrl = mods
+    Globals.cursor_frame = 0
     # Search bar
     if tab_view.search_view.searchbar.active and not (key == pyg.K_SPACE and tab_view.search_view.searchbar.text == ""):
         tab_view.search_view.searchbar.text, Globals.cursor_position = typing_handler.handler(tab_view.search_view.searchbar.text, key, mods, Globals.cursor_position)
@@ -23,10 +24,10 @@ def handle_input(key, mods, tab_view: TabContainer):
             tab_view.dream_log_view.dream_title.active = True
             Globals.cursor_position = len(tab_view.dream_log_view.dream_title.text)
         else:
-            tab_view.dream_log_view.dream_input.text, Globals.cursor_position = typing_handler.handler(tab_view.dream_log_view.dream_input.text, key, mods, Globals.cursor_position)
+            tab_view.dream_log_view.dream_input.text, Globals.cursor_position = typing_handler.handler(tab_view.dream_log_view.dream_input.text, key, mods, Globals.cursor_position, allow_enter=True)
 
     # Dream log title
-    elif tab_view.dream_log_view.dream_title.active:
+    elif tab_view.dream_log_view.dream_title.active :
         if key == pyg.K_TAB and shift:
             tab_view.dream_log_view.dream_input.active = True
             tab_view.dream_log_view.dream_title.active = False
@@ -48,6 +49,7 @@ def handle_input(key, mods, tab_view: TabContainer):
             tab_view.dream_log_view.date_input.text, Globals.cursor_position = typing_handler.handle_ints(tab_view.dream_log_view.date_input.text, key, mods, Globals.cursor_position)
 
 def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_bar: TabBar):    
+    Globals.cursor_frame = 0
     # Confirmation popups
     if tab_view.popup.displayed and not tab_view.popup.check_mcollision():
         tab_view.popup.displayed = False
@@ -129,11 +131,13 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
         tab_view.dream_log_view.date_input.active = False
 
         # Filter dropdown
-        option =  tab_view.dream_log_view.sort_dropdown.click()
+        option = tab_view.dream_log_view.sort_dropdown.click()
         if option:
             if not isinstance(option, bool):
                 tab_view.dream_log_view.sort_dreams(option)
             return
+        else:
+            tab_view.dream_log_view.sort_dropdown.active = False
 
         # Dream log inputs
         if tab_view.dream_log_view.dream_input.check_mcollision():
@@ -197,4 +201,4 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
 def handle_mouse_scroll(tab_view: TabContainer, event: pyg.event.Event):
     if tab_view.view == "Dream Log":
         if tab_view.dream_log_view.dream_input.check_mcollision():
-            tab_view.dream_log_view.dream_input.scroll_text_content(-event.y)
+            tab_view.dream_log_view.dream_input.scroll_content(-event.y)

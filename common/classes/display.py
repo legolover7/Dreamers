@@ -25,3 +25,13 @@ class Fonts:
     font_20 = pyg.font.SysFont("consolas", 20)
     font_24 = pyg.font.SysFont("consolas", 24)
     font_30 = pyg.font.SysFont("consolas", 30)
+    font_35 = pyg.font.SysFont("consolas", 35)
+
+
+class ColorScheme:
+    background_color = Colors.black
+
+    field_border_color = Colors.gray
+    field_background_color = Colors.dark_gray 
+    text_color = Colors.white
+    dim_text_color = Colors.lighter_gray

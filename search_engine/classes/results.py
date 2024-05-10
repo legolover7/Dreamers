@@ -4,8 +4,8 @@ with contextlib.redirect_stdout(None):
 
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals
-from common.modules.collider import collides_point
-from common.modules.chunk_text import chunk
+import common.modules.collider as collider
+import common.modules.chunk_text as chunk_text
 
 class Result:
     def __init__(self, data, selected=False):
@@ -36,7 +36,7 @@ class Result:
 
         # Display the description
         char_width, char_height = Fonts.font_20.size("A")
-        description_text = chunk(description, content_width=Globals.WIDTH/2 - 70, char_width=char_width)
+        description_text = chunk_text.chunk(description, content_width=Globals.WIDTH/2 - 70, char_width=char_width)
         if len(description_text) > 0:
             window.blit(Fonts.font_20.render(description_text[0].strip() + ("..." if len(description_text) > 1 else ""), True, Colors.dark_white), offset)
         offset[1] += char_height
@@ -57,7 +57,7 @@ class Result:
                         "term": rel
                     }]
 
-                color = Colors.light_blue if collides_point(Globals.mouse_position, (offset[0] + hori_offset, offset[1], text_width, text_height)) else Colors.dark_white
+                color = Colors.light_blue if collider.collides_point(Globals.mouse_position, (offset[0] + hori_offset, offset[1], text_width, text_height)) else Colors.dark_white
                 # Draw text
                 window.blit(Fonts.font_18.render(rel, True, color), (offset[0] + hori_offset, offset[1]))
                 window.blit(Fonts.font_18.render(comma, True, Colors.dark_white), (offset[0] + hori_offset + Fonts.font_18.size(rel)[0], offset[1]))
@@ -70,12 +70,12 @@ class Result:
     
     def check_mcollision(self) -> bool:
         """Returns true if mouse cursor is within this result's bound"""
-        return collides_point(Globals.mouse_position, (self.ox-8, self.oy, Globals.WIDTH/2-6, self.height))
+        return collider.collides_point(Globals.mouse_position, (self.ox-8, self.oy, Globals.WIDTH/2-6, self.height))
 
     def check_related_click(self) -> str:
         """Returns the search term of the related link clicked"""
         for link in self.related_links:
-            if collides_point(Globals.mouse_position, (link["rect"])):
+            if collider.collides_point(Globals.mouse_position, (link["rect"])):
                 return link["term"]
 
     def get_data(self):

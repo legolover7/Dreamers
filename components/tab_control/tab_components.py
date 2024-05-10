@@ -8,7 +8,7 @@ import time
 import os
 
 from common.classes.buttons import *
-from common.classes.input_field import DateInput, InputField
+from common.classes.input_field import *
 from common.classes.display import Colors, Fonts
 from common.classes.globals import Globals, FilePaths
 from common.classes.list_container import *
@@ -201,7 +201,7 @@ class SearchView:
     def __init__(self, position):
         self.x, self.y = position
         self.width, self.height = Globals.WIDTH - self.x, Globals.HEIGHT - 50
-        self.searchbar = InputField((self.x + 50, self.y + 50, self.width - 100, 30), Fonts.font_20, "Enter Search")
+        self.searchbar = IFBox((self.x + 50, self.y + 50, self.width - 100, 30), "Enter Search", Fonts.font_20, max_length=-1)
         self.history = []
 
     def draw(self, window):
@@ -264,11 +264,13 @@ class SettingsView:
             self.boxes[box].draw(window)
 
         text_width, text_height = Fonts.font_20.size("Special thanks to my girlfriend, without whom")
-        window.blit(Fonts.font_20.render("Special thanks to my girlfriend, without whom", True, Colors.gray), (self.x + (self.width - text_width) / 2, self.y + self.height - text_height * 2 - 2))
-        text_width, text_height = Fonts.font_20.size("I wouldn't have been able to complete this project.")
-        window.blit(Fonts.font_20.render("I wouldn't have been able to complete this project.", True, Colors.gray), (self.x + (self.width - text_width) / 2, self.y + self.height - text_height - 2))
+        window.blit(Fonts.font_20.render("Special thanks to my girlfriend, without whom", True, Colors.gray), (self.x + (self.width - text_width) / 2 + 60, self.y + self.height - text_height * 2 - 2))
+        text_width = Fonts.font_20.size("I wouldn't have been able to complete this project.")[0]
+        window.blit(Fonts.font_20.render("I wouldn't have been able to complete this project.", True, Colors.gray), (self.x + (self.width - text_width) / 2 + 60, self.y + self.height - text_height - 2))
 
-        window.blit(Fonts.font_20.render("v" + Globals.VERSION_NUMBER, True, Colors.gray), (self.x + 5, self.y + self.height - 24))
+        window.blit(Fonts.font_20.render("(c) legolover7", True, Colors.gray), (self.x + 5, self.y + self.height - text_height - 2))
+
+        window.blit(Fonts.font_20.render("v" + Globals.VERSION_NUMBER, True, Colors.gray), (self.x + 5, self.y + self.height - text_height * 2 - 2))
 
         # Draw checkboxes
         for box in self.boxes:
@@ -282,16 +284,18 @@ class DreamLogView:
         self.popup_displayed = False
 
         # Fields/buttons
-        self.dream_input = InputField((self.x + 20, self.y + 20, self.width - 40, self.height / 2 - 100), Fonts.font_24, "Enter dream", scrollable=True, center_text=False)
-        self.dream_title = InputField((self.x + 20, self.y + self.height / 2 - 60, 400, 30), Fonts.font_20, "Enter title", scrollable=True, center_text=False)
+        self.dream_input = IFBlock((self.x + 20, self.y + 20, self.width - 40, self.height / 2 - 100), "Enter dream", Fonts.font_24)
+        self.dream_title = IFBox((self.x + 20, self.y + self.height / 2 - 60, 400, 30), "Enter title", Fonts.font_20, max_length=-1)
         self.date_input = DateInput((self.x + 450, self.y + self.height / 2 - 60, 200, 30), "MM/DD/YYYY")
-        self.save_button = Button((self.x + 700, self.y + self.height / 2 - 65, 150, 40), Colors.green, "Save Dream", Fonts.font_20, Colors.white)
-        self.delete_button = Button((self.x + 700, self.y + self.height / 2, 150, 40), Colors.red, "Remove Dream", Fonts.font_20, Colors.white)
+        self.save_button = Button((self.x + 665, self.y + self.height / 2 - 65, 100, 40), Colors.green, "Save", Fonts.font_20, Colors.white)
+        self.delete_button = Button((self.x + 780, self.y + self.height / 2 - 65, 100, 40), Colors.red, "Remove", Fonts.font_20, Colors.white)
 
         # Filter drowdown
-        self.sort_dropdown = Dropdown((self.x + 448, self.y + self.height/2, 180, 25), Fonts.font_18, Colors.dark_gray, ["Select a filter", "Date Modified", "Date Dreamt", "Alpha (A-Z)", "Alpha (Z-A)"], Colors.white)
+        self.sort_dropdown = Dropdown((self.x + 440, self.y + self.height/2, 180, 25), Fonts.font_18, Colors.dark_gray, ["Select a filter", "Date Modified", "Date Dreamt", "Alpha (A-Z)", "Alpha (Z-A)"], Colors.white)
         
-        self.list_container = ListContainer((self.x + 20, self.y + self.height / 2 + 30, self.width * 2 / 3, self.height / 2 - 40))
+        self.list_container = ListContainer((self.x + 20, self.y + self.height / 2 + 30, self.width * 0.66, self.height / 2 - 40), [])
+        self.term_container = ListContainer((self.x + self.width * 0.7, self.y + self.height / 2 + 30, self.width * 0.25, self.height / 2 - 40), [])
+
         # Get saved dreams
         if os.path.isfile(FilePaths.logs):
             with open(FilePaths.logs, "r") as infile:
@@ -299,7 +303,7 @@ class DreamLogView:
                 for log in data:
                     self.list_container.contents.append(ListContent(log["title"], log["date_dreamed"], log["date_modified"], log["data"]))
 
-    def draw(self, window):
+    def draw(self, window: pyg.Surface):
         self.dream_input.draw(window)
         self.dream_title.draw(window)
         self.date_input.draw(window)
@@ -309,6 +313,10 @@ class DreamLogView:
         self.sort_dropdown.draw(window)
 
         window.blit(Fonts.font_24.render("Saved Dreams:", True, Colors.white), (self.x + 20, self.y + self.height / 2))
+
+        if len(self.term_container.contents) > 0:
+            self.term_container.draw(window)
+            window.blit(Fonts.font_24.render("Current Terms:", True, Colors.white), (self.x + self.width * 0.7, self.y + self.height / 2))
     
     def save_dream(self):
         """Saves the text in the input fields into a list content object"""

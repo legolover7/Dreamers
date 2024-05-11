@@ -123,7 +123,11 @@ def handle_mouse_click(tab_view: TabContainer, results_view: ResultsView, tab_ba
             tab_view.search_view.searchbar.active = True
             Globals.cursor_position = len(tab_view.search_view.searchbar.text)
             return
-
+        
+        nav = tab_view.search_view.check_nav_arrow_clicked()
+        if nav:
+            navigate_result(tab_view, results_view, nav)
+        
     # Check for dream log's input fields and list container
     elif tab_view.view == "Dream Log":
         tab_view.dream_log_view.dream_input.active = False
@@ -202,3 +206,19 @@ def handle_mouse_scroll(tab_view: TabContainer, event: pyg.event.Event):
     if tab_view.view == "Dream Log":
         if tab_view.dream_log_view.dream_input.check_mcollision():
             tab_view.dream_log_view.dream_input.scroll_content(-event.y)
+
+
+def navigate_result(tab_view: TabContainer, results_view: ResultsView, direction):
+    if direction == "back":
+        tab_view.search_view.search_index += 1
+        previous_search = tab_view.search_view.history[len(tab_view.search_view.history) - tab_view.search_view.search_index - 1]
+        results_view.update_search({"keyword": previous_search, "type": "contains"})
+        tab_view.search_view.searchbar.text = previous_search
+        Globals.cursor_position = len(previous_search)
+
+    else:
+        tab_view.search_view.search_index -= 1
+        previous_search = tab_view.search_view.history[len(tab_view.search_view.history) - tab_view.search_view.search_index - 1]
+        results_view.update_search({"keyword": previous_search, "type": "contains"})
+        tab_view.search_view.searchbar.text = previous_search
+        Globals.cursor_position = len(previous_search)

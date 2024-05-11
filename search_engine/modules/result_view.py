@@ -37,6 +37,12 @@ class ResultsView:
             text_width = Fonts.font_30.size("No search results found")[0]
             window.blit(Fonts.font_30.render("No search results found", True, Colors.light_gray), (x + (width - text_width)/2, y + 10))
 
+    def get_search(self, keyword):
+        """Returns a Result containing the data of the supplied keyword"""
+        for i in range(len(self.data)):
+            if keyword.lower() == self.data[i]["keyword"].lower():
+                return Result(self.data[i])
+
     def update_search(self, criteria={}):
         """Updates the search contents based on the criteria provided"""
         self.search_results: list[Result] = []

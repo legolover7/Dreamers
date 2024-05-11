@@ -109,6 +109,7 @@ class Tab:
 class DefinitionView:
     def __init__(self):
         self.clear_search_button = None
+        self.split_semis = True
 
     def draw(self, window, position, current_search):
         """Draws the definition view component"""
@@ -128,7 +129,10 @@ class DefinitionView:
 
         # Draw description
         window.blit(Fonts.font_30.render("Description:", True, Colors.white), (x + 40, y + 165))
-        description_text = description.split(";")
+        if self.split_semis:
+            description_text = description.split(";")
+        else:
+            description_text = [description]
         if len(description_text[0]) == 0:
             description_text = ["No description set"]
 
@@ -143,20 +147,21 @@ class DefinitionView:
         line_offset = draw_field_multiline(window, field_width, Fonts.font_24, temp_desc, (x + 40, line_offset))
 
         # Draw related terms
-        line_offset += 50
-        window.blit(Fonts.font_30.render("Related Terms:", True, Colors.white), (x + 40, line_offset))
-        line_offset += 40
-        if len(related) == 0:
-            related = ["No related links set"]
-        
-        # Format terms
-        temp_related = copy.deepcopy(related)
-        for i in range(len(temp_related)):
-            if temp_related[i] != "No related terms set":
-                temp_related[i] = temp_related[i][0].capitalize() + temp_related[i][1:] 
-                temp_related[i] += "," if i != len(temp_related) - 1 else ""
+        if related:
+            line_offset += 50
+            window.blit(Fonts.font_30.render("Related Terms:", True, Colors.white), (x + 40, line_offset))
+            line_offset += 40
+            if len(related) == 0:
+                related = ["No related links set"]
             
-        line_offset = draw_field_multiline(window, field_width, Fonts.font_24, temp_related, (x + 40, line_offset), none_text="No related terms set")
+            # Format terms
+            temp_related = copy.deepcopy(related)
+            for i in range(len(temp_related)):
+                if temp_related[i] != "No related terms set":
+                    temp_related[i] = temp_related[i][0].capitalize() + temp_related[i][1:] 
+                    temp_related[i] += "," if i != len(temp_related) - 1 else ""
+                
+            line_offset = draw_field_multiline(window, field_width, Fonts.font_24, temp_related, (x + 40, line_offset), none_text="No related terms set")
 
         # Draw references
         references = current_search.data["references"]
@@ -201,10 +206,11 @@ class SearchView:
     def __init__(self, position):
         self.x, self.y = position
         self.width, self.height = Globals.WIDTH - self.x, Globals.HEIGHT - 50
-        self.searchbar = IFBox((self.x + 50, self.y + 50, self.width - 100, 30), "Enter Search", Fonts.font_20, max_length=-1)
+        self.searchbar = IFBox((self.x + 50, self.y + 50, self.width - 200, 30), "Enter Search", Fonts.font_20, max_length=-1)
         self.history = []
+        self.search_index = 0
 
-    def draw(self, window):
+    def draw(self, window: pyg.Surface):
         """Draws the search view component"""
         window.blit(Fonts.font_24.render("Search for Terms:", True, Colors.white), (self.x + 50, self.y + 20))
         self.searchbar.draw(window)
@@ -214,6 +220,23 @@ class SearchView:
         pyg.draw.rect(window, Colors.gray, (self.x + 50, self.y + 130, self.width - 100, (char_height + 2) * 20), border_radius=8)
         pyg.draw.rect(window, Colors.black, (self.x + 52, self.y + 132, self.width - 104, (char_height + 2) * 20 - 4), border_radius=8)
 
+        # Draw navigation arrows
+        x = self.x + self.width - 130
+        y = self.y + 50
+        # Left
+        if collides_point(Globals.mouse_position, circle=(x + 7, y + 16, 13)):
+            pyg.draw.circle(window, Colors.dark_gray, (x + 7, y + 16), 13)
+        pyg.draw.line(window, Colors.white, (x, y + 15), (x + 14, y + 15))
+        pyg.draw.line(window, Colors.white, (x, y + 15), (x + 7, y + 8))
+        pyg.draw.line(window, Colors.white, (x, y + 15), (x + 7, y + 22))
+
+        # Right
+        if collides_point(Globals.mouse_position, circle=(x + 39, y + 16, 13)):
+            pyg.draw.circle(window, Colors.dark_gray, (x + 39, y + 16), 13)
+        pyg.draw.line(window, Colors.white, (x + 32, y + 15), (x + 46, y + 15))
+        pyg.draw.line(window, Colors.white, (x + 46, y + 15), (x + 39, y + 8))
+        pyg.draw.line(window, Colors.white, (x + 46, y + 15), (x + 39, y + 22))
+
         # Draw search history links
         for i in range(min(20, len(self.history))):
             index = len(self.history) - i - 1
@@ -222,6 +245,14 @@ class SearchView:
                 pyg.draw.rect(window, Colors.gray, (self.x + 55, self.y + 134 + i * (char_height + 2), self.width - 110, char_height + 2), border_radius=4)
 
             window.blit(Fonts.font_24.render(self.history[index], True, Colors.white), (self.x + 60, self.y + 135 + i * (char_height + 2)))
+
+    def check_nav_arrow_clicked(self):
+        x = self.x + self.width - 130
+        y = self.y + 50
+        if collides_point(Globals.mouse_position, circle=(x + 7, y + 16, 13)) and self.search_index < len(self.history) - 1:
+            return "back"
+        if collides_point(Globals.mouse_position, circle=(x + 39, y + 16, 13)) and self.search_index > 0:
+            return "forward"
 
     def check_history_clicked(self):
         for i in range(min(20, len(self.history))):
@@ -239,7 +270,8 @@ class SettingsView:
         self.data = {
             "show_fps": False,
             "save_history": True,
-            "confirm_log_delete": True
+            "confirm_log_delete": True,
+            "bible_search": False
         }
 
         if os.path.isfile(FilePaths.settings):
@@ -250,12 +282,14 @@ class SettingsView:
         fps_tt = ToolTip("Determines whether or not the FPS (Frames per Second) of the application is displayed.", Globals.FPS/2, 550)
         save_ttp = ToolTip("Determines whether or not search queries are saved.", Globals.FPS/2, 550)
         cfld_ttp = ToolTip("Determines whether or not the confirmation popup for the dream log deletion is shown.", Globals.FPS/2, 550)
+        bbs_ttp = ToolTip("Determines whether or not the application will try to search for Bible verses.", Globals.FPS/2, 550)
 
         # Settings
         self.boxes = {
             "show_fps": Checkbox((self.x + 20, self.y + 20, 20, 20), "Show FPS", Fonts.font_20, default_active=self.data["show_fps"], value="show_fps", left_align=True, tooltip=fps_tt),
             "save_history": Checkbox((self.x + 20, self.y + 50, 20, 20), "Save Search History", Fonts.font_20, default_active=self.data["save_history"], value="save_history", left_align=True, tooltip=save_ttp),
-            "confirm_log_delete": Checkbox((self.x + 20, self.y + 80, 20, 20), "Show Dream Log Removal Confirmation", Fonts.font_20, default_active=self.data["confirm_log_delete"], value="confirm_log_delete", left_align=True, tooltip=cfld_ttp)
+            "confirm_log_delete": Checkbox((self.x + 20, self.y + 80, 20, 20), "Show Dream Log Removal Confirmation", Fonts.font_20, default_active=self.data["confirm_log_delete"], value="confirm_log_delete", left_align=True, tooltip=cfld_ttp),
+            "bible_search": Checkbox((self.x + 20, self.y + 110, 20, 20), "Allow Bible Searches", Fonts.font_20, default_active=self.data["bible_search"], value="bible_search", left_align=True, tooltip=bbs_ttp),
         }
 
     def draw(self, window: pyg.Surface):

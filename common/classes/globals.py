@@ -26,7 +26,7 @@ class Globals:
     cursor_frame = 0 
 
     MAX_RETURN_NUMBER = 15
-    VERSION_NUMBER = "0.1.2"
+    VERSION_NUMBER = "0.1.3"
 
 class FilePaths:
     settings = "./data/settings.json"

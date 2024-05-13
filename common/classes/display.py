@@ -9,12 +9,14 @@ class Colors:
     dark_gray = (50, 50, 50)
     gray = (70, 70, 70)
     light_gray = (90, 90, 90)
+    lightish_gray = (105, 105, 105)
     lighter_gray = (120, 120, 120)
     dark_white = (200, 200, 200)
     white = (255, 255, 255)
 
     green = (0, 200, 0)
     aqua = (0, 255, 255)
+    dark_aqua = (0, 128, 128)
     blue = (0, 0, 200)
     light_blue = (0, 0, 238)
     red = (200, 0, 0)
@@ -27,11 +29,26 @@ class Fonts:
     font_30 = pyg.font.SysFont("consolas", 30)
     font_35 = pyg.font.SysFont("consolas", 35)
 
-
 class ColorScheme:
-    background_color = Colors.black
+    def __init__(self, bg, bgbdr, fbdr, fbg, stc, tc, dtc, cc):
+        self.background_color = bg
+        self.background_border_color = bgbdr
+        self.field_border_color = fbdr
+        self.field_background_color = fbg
+        self.selected_tab_color = stc
+        self.text_color = tc
+        self.dim_text_color = dtc
+        self.cursor_color = cc
 
-    field_border_color = Colors.gray
-    field_background_color = Colors.dark_gray 
-    text_color = Colors.white
-    dim_text_color = Colors.lighter_gray
+class ColorTheme:
+    #                        Background         Background Border  Field background     Field border       Selected Tab color    Text          Dimmed text          Cursor
+    dark_mode  = ColorScheme(Colors.black,      Colors.dark_black, Colors.gray,         Colors.dark_gray,  Colors.light_gray,    Colors.white, Colors.lighter_gray, Colors.white)
+    light_mode = ColorScheme(Colors.dark_white, Colors.dark_white, Colors.dark_white,   Colors.gray,       Colors.lighter_gray,    Colors.black, Colors.gray,         Colors.black)
+    current_theme = dark_mode
+
+    def change_theme(theme):
+        if theme == "Dark":
+            ColorTheme.current_theme = ColorTheme.dark_mode
+
+        elif theme == "Light":
+            ColorTheme.current_theme = ColorTheme.light_mode

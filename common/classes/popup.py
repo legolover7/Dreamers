@@ -4,7 +4,6 @@ with contextlib.redirect_stdout(None):
 
 from common.classes.buttons import Button
 from common.classes.display import Colors, Fonts
-from common.classes.globals import Globals
 import common.modules.chunk_text as chunk_text
 import common.modules.collider as collider
 
@@ -14,23 +13,42 @@ class Popup:
         self.text = text
         self.text_margin = text_margin
         self.displayed = False
+        self._display_surface = pyg.Surface((self.width, self.height))
 
-        self.cancel_button = Button((self.x + 20, self.y + self.height - 60, 120, 40), Colors.red, "Cancel", Fonts.font_20, Colors.white)
-        self.confirm_button = Button((self.x + self.width - 140, self.y + self.height - 60, 120, 40), Colors.green, "Confirm", Fonts.font_20, Colors.white)
+        self.cancel_button = Button((20, self.height - 60, 120, 40), Colors.red, "Cancel", Fonts.font_20, Colors.white)
+        self.confirm_button = Button((self.width - 140, self.height - 60, 120, 40), Colors.green, "Confirm", Fonts.font_20, Colors.white)
 
-    def draw(self, window: pyg.Surface):
-        pyg.draw.rect(window, Colors.gray, (self.x, self.y, self.width, self.height), border_radius=8)
-        pyg.draw.rect(window, Colors.black, (self.x + 2, self.y + 2, self.width - 4, self.height - 4), border_radius=8)
+    def draw(self, window: pyg.Surface, mouse_position: list):
+        # Draw background
+        self._display_surface.fill(Colors.gray)
+        pyg.draw.rect(self._display_surface, Colors.gray, (0, 0, self.width, self.height), border_radius=8)
+        pyg.draw.rect(self._display_surface, Colors.black, (2, 2, self.width - 4, self.height - 4), border_radius=8)
 
+        mouse_position[0] -= self.x
+        mouse_position[1] -= self.y - 30
+
+        # Draw text
         text = chunk_text.chunk(self.text, content_width=self.width-(self.text_margin*2), char_width=Fonts.font_20.size("A")[0])
-        vertical_position = self.y + 10
+        vertical_position = 10
         for line in text:
             text_width, text_height = Fonts.font_20.size(line)
-            window.blit(Fonts.font_20.render(line, True, Colors.white), (self.x + (self.width - text_width)/2, vertical_position))
+            self._display_surface.blit(Fonts.font_20.render(line, True, Colors.white), ((self.width - text_width)/2, vertical_position))
             vertical_position += text_height + 2
 
-        self.cancel_button.draw(window)
-        self.confirm_button.draw(window)
+        self.cancel_button.draw(self._display_surface, mouse_position)
+        self.confirm_button.draw(self._display_surface, mouse_position)
 
-    def check_mcollision(self):
-        return collider.collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
+        window.blit(self._display_surface, (self.x, self.y))
+
+    def check_mcollision(self, mouse_position):
+        return collider.collides_point(mouse_position, (self.x, self.y, self.width, self.height))
+
+    def click(self, mouse_position):
+        mouse_position[0] -= self.x
+        mouse_position[1] -= self.y
+        print(mouse_position, (self.cancel_button.x, self.cancel_button.y))
+
+        if self.cancel_button.check_mcollision(mouse_position):
+            return "Cancel"
+        if self.confirm_button.check_mcollision(mouse_position):
+            return "Confirm"

@@ -1,6 +1,4 @@
-import contextlib
-with contextlib.redirect_stdout(None):
-    import pygame as pyg
+import pygame as pyg
 
 class Globals:
     # Default size of the application
@@ -8,7 +6,7 @@ class Globals:
     # User's monitor size
     WINDOW_WIDTH, WINDOW_HEIGHT = (1920, 1080)
     # Actual window object that gets displayed to the user
-    WINDOW = None
+    WINDOW = pyg.surface.Surface((0, 0))
     # Image buffer that gets scaled to the user's monitor size, from the default size
     VID_BUFFER = pyg.surface.Surface((WIDTH, HEIGHT))
 
@@ -26,7 +24,7 @@ class Globals:
     cursor_frame = 0 
 
     MAX_RETURN_NUMBER = 15
-    VERSION_NUMBER = "0.1.3"
+    VERSION_NUMBER = "0.2.0"
 
 class FilePaths:
     settings = "./data/settings.json"

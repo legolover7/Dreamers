@@ -6,14 +6,19 @@ import sys
 import os
 
 # Common classes
-from common.classes.display import Colors, Fonts
+from common.classes.display import Colors, Fonts, ColorTheme
 from common.classes.globals import Globals
 from components.utilities.profiler import Profiler
 # Specific classes
 from search_engine.classes.results import Result
 from search_engine.modules.result_view import ResultsView
+# Components
 from components.tab_control.tab_container import TabContainer
 from components.tab_control.tab_components import Tab, TabBar
+from components.tab_control.search_view import SearchView
+from components.tab_control.definition_view import DefinitionView
+from components.tab_control.dream_log_view import DreamLogView
+from components.tab_control.settings_view import SettingsView
 # Modules
 import search_engine.modules.event_handlers as ev_handlers
 import search_engine.modules.draw as draw
@@ -34,15 +39,23 @@ def Main():
 
     profiler = Profiler(Globals.FPS, (Globals.WIDTH - 30, Globals.HEIGHT - 22), Fonts.font_20, Colors.white)
     
-    tab_view = TabContainer([
-        Tab((Globals.WIDTH/2 + 52, 0, 75, 30), "Search"), Tab((Globals.WIDTH/2 + 125, 0, 120, 30), "Definition"), 
-        Tab((Globals.WIDTH/2 + 243, 0, 110, 30), "Dream Log"), Tab((Globals.WIDTH/2 + 351, 0, 100, 30), "Settings")
+    tab_view = TabContainer(
+        (Globals.WIDTH/2 + 50, 0), (Globals.WIDTH/2 - 50, Globals.HEIGHT),
+        [Tab((2, 0, 75, 30), "Search"), Tab((75, 0, 120, 30), "Definition"), 
+         Tab((193, 0, 110, 30), "Dream Log"), Tab((301, 0, 100, 30), "Settings")
     ])
     tab_bar = TabBar()
 
+    # Unpack tab view objects
+    search_view:     SearchView     = tab_view.views["Search"]
+    definition_view: DefinitionView = tab_view.views["Definition"]
+    dream_log_view:  DreamLogView   = tab_view.views["Dream Log"]
+    settings_view:   SettingsView   = tab_view.views["Settings"]
+
     while True:
         profiler.calc_frame()
-        profiler.display = tab_view.settings_view.boxes["show_fps"].active
+        profiler.display = settings_view.boxes["show_fps"].active
+        dream_log_view.confirm_delete = settings_view.boxes["confirm_log_delete"].active
 
         # Get events
         for event in pyg.event.get():
@@ -60,32 +73,32 @@ def Main():
                     Quit(tab_view)
 
                 if key == pyg.K_F9:
-                    tab_view.settings_view.boxes["show_fps"].active = not tab_view.settings_view.boxes["show_fps"].active
+                    settings_view.boxes["show_fps"].active = not tab_view.settings_view.boxes["show_fps"].active
 
                 elif key == pyg.K_RETURN and tab_view.view == "Search":
-                    search = tab_view.search_view.searchbar.text
+                    search = search_view.searchbar.text
                     # Search for item and save it to history (if active)
                     if search != "":
-                        tab_view.definition_view.split_semis = True
-                        tab_view.search_view.searchbar.text = ""
-                        if tab_view.settings_view.boxes["save_history"].active:
-                            tab_view.search_view.history.append(search)
+                        definition_view.split_semis = True
+                        search_view.searchbar.text = ""
+                        if settings_view.boxes["save_history"].active:
+                            search_view.history.append(search)
                         Globals.cursor_position = 0
                         results_view.update_search({"keyword": search, "type": "contains"})
-                        tab_view.search_view.search_index = 0
+                        search_view.search_index = 0
 
                         # Search for bible verses
-                        if len(results_view.search_results) == 0 and tab_view.settings_view.boxes["bible_search"].active:
+                        if len(results_view.search_results) == 0 and settings_view.boxes["bible_search"].active:
                             response = requests.get("https://labs.bible.org/api/?passage=" + search + "&formatting=plain")
                             if response.status_code == 200:
                                 tab_view.update_view("Definition")
-                                tab_view.definition_view.split_semis = False
-                                tab_view.current_search = Result({"keyword": search, "description": response.text, "related_terms": False, "references": ["From: https://labs.bible.org/api/"], "page_number": "", "is_verb": False, "is_noun": False, "is_adjective": False})
+                                definition_view.split_semis = False
+                                definition_view.current_search = Result({"keyword": search, "description": response.text, "related_terms": False, "references": ["From: https://labs.bible.org/api/"], "page_number": "", "is_verb": False, "is_noun": False, "is_adjective": False})
 
-                elif key == pyg.K_PAGEDOWN and tab_view.dream_log_view.dream_input.active:
-                    tab_view.dream_log_view.dream_input.scroll_content(0, "max")
-                elif key == pyg.K_PAGEUP and tab_view.dream_log_view.dream_input.active:
-                    tab_view.dream_log_view.dream_input.scroll_content(0, "min")
+                elif key == pyg.K_PAGEDOWN and dream_log_view.dream_input.active:
+                    dream_log_view.dream_input.scroll_content(0, "max")
+                elif key == pyg.K_PAGEUP and dream_log_view.dream_input.active:
+                    dream_log_view.dream_input.scroll_content(0, "min")
 
                 else:
                     ev_handlers.handle_input(key, (shift, caps, ctrl), tab_view)
@@ -98,23 +111,23 @@ def Main():
 
                 # Middleclick on history item brings it to the description view
                 elif event.button == 2:
-                    index = tab_view.search_view.check_history_clicked()
+                    index = search_view.check_history_clicked()
                     if index != None:
-                        tab_view.definition_view.split_semis = True
+                        definition_view.split_semis = True
                         tab_view.update_view("Definition")
-                        tab_view.current_search = results_view.get_search(tab_view.search_view.history[index])
+                        definition_view.current_search = results_view.get_search(search_view.history[index])
 
-                        if tab_view.current_search == None and tab_view.settings_view.boxes["bible_search"].active:
+                        if definition_view.current_search == None and settings_view.boxes["bible_search"].active:
                             response = requests.get("https://labs.bible.org/api/?passage=" + search + "&formatting=plain")
                             if response.status_code == 200:
                                 tab_view.update_view("Definition")
-                                tab_view.definition_view.split_semis = False
-                                tab_view.current_search = Result({"keyword": search, "description": response.text, "related_terms": False, "references": ["From: https://labs.bible.org/api/"], "page_number": "", "is_verb": False, "is_noun": False, "is_adjective": False})
+                                definition_view.split_semis = False
+                                definition_view.current_search = Result({"keyword": search, "description": response.text, "related_terms": False, "references": ["From: https://labs.bible.org/api/"], "page_number": "", "is_verb": False, "is_noun": False, "is_adjective": False})
 
-                elif event.button == 6 and tab_view.search_view.search_index < len(tab_view.search_view.history) - 1:
+                elif event.button == 6 and search_view.search_index < len(search_view.history) - 1:
                     ev_handlers.navigate_result(tab_view, results_view, "back")
 
-                elif event.button == 7 and tab_view.search_view.search_index > 0:
+                elif event.button == 7 and search_view.search_index > 0:
                     ev_handlers.navigate_result(tab_view, results_view, "forward")
             
             elif event.type == pyg.MOUSEWHEEL:
@@ -126,10 +139,10 @@ def Main():
 
 def Quit(tab_view: TabContainer):
     # Save data
-    s_handler.save_settings(tab_view.settings_view.data)
+    s_handler.save_settings(tab_view.views["Settings"].data)
 
     dream_data = {"dreams": []}
-    for dream in tab_view.dream_log_view.list_container.contents:
+    for dream in tab_view.views["Dream Log"].list_container.contents:
         dream_data["dreams"].append({"title": dream.title, "date_dreamed": dream.date_dreamt, "date_modified": dream.date_modified, "data": dream.data})
         
     s_handler.save_dreams(dream_data)

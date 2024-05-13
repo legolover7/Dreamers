@@ -2,7 +2,7 @@ import contextlib
 with contextlib.redirect_stdout(None):
     import pygame as pyg
 
-from common.classes.display import Colors, Fonts, ColorScheme
+from common.classes.display import Colors, Fonts, ColorTheme
 from common.classes.globals import Globals
 import common.modules.collider as collider
 import common.modules.chunk_text as chunk_text
@@ -18,7 +18,6 @@ class IFBase:
         
         display_surface: The surface that this field is drawn to, then which is drawn to the screen
 
-        bg_color, self.bdr_color: The background and border color of this field
         border_radius: The border radius of the field
         border_size: How large the size of the border is
         text_spacing: The additional spacing between lines of text
@@ -34,8 +33,6 @@ class IFBase:
         self.display_surface = pyg.Surface((self.width, self.height))
 
         # Set defaults
-        self.bg_color = ColorScheme.field_background_color
-        self.bdr_color = ColorScheme.field_border_color
         self.border_radius = 8
         self.border_size = 2
         self.text_spacing = 1
@@ -44,11 +41,11 @@ class IFBase:
 
     def draw_rect(self):
         """Draws the background/base of this input field"""
-        self.display_surface.fill(ColorScheme.background_color)
-        pyg.draw.rect(self.display_surface, self.bdr_color, (0, 0, self.width, self.height), border_radius=self.border_radius)
-        pyg.draw.rect(self.display_surface, self.bg_color, (0 + self.border_size, 0 + self.border_size, self.width - self.border_size * 2, self.height - self.border_size * 2), border_radius=self.border_radius)
+        self.display_surface.fill(ColorTheme.current_theme.background_color)
+        pyg.draw.rect(self.display_surface, ColorTheme.current_theme.field_background_color, (0, 0, self.width, self.height), border_radius=self.border_radius)
+        pyg.draw.rect(self.display_surface, ColorTheme.current_theme.field_border_color, (0 + self.border_size, 0 + self.border_size, self.width - self.border_size * 2, self.height - self.border_size * 2), border_radius=self.border_radius)
 
-    def draw_text_line(self, line: str, position: int, color: tuple = ColorScheme.text_color):
+    def draw_text_line(self, line: str, position: int, color: tuple = ColorTheme.current_theme.text_color):
         """Draws the given line of text to this input field. Doesn't draw if it's off the screen"""
         if position < -1 or position > self.height / self.line_spacing:
             return
@@ -58,15 +55,16 @@ class IFBase:
         """Draws the cursor at the given line, offset to the given character position"""
         if Globals.cursor_frame > Globals.cursor_timeout or (Globals.cursor_frame % Globals.cursor_period < Globals.cursor_period / 2):
             horizontal_position = 4 + self.text_font.size(line[:char_position])[0]
-            pyg.draw.rect(self.display_surface, Colors.white, (horizontal_position, 4 + line_position * self.line_spacing, 2, self.line_spacing - self.text_spacing * 2))
+            pyg.draw.rect(self.display_surface, ColorTheme.current_theme.cursor_color, (horizontal_position, 4 + line_position * self.line_spacing, 2, self.line_spacing - self.text_spacing * 2))
 
     def blit_to_screen(self, window: pyg.Surface):
         """Display this field to the screen"""
         window.blit(self.display_surface, (self.x, self.y))
 
-    def check_mcollision(self):
+    def check_mcollision(self, point: list=[0, 0]):
         """Returns true if the mouse cursor is colliding with this field"""
-        return collider.collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
+        m = point if point != [0, 0] else Globals.mouse_position
+        return collider.collides_point(m, (self.x, self.y, self.width, self.height))
 
 class IFBlock(IFBase):
     """An Input Field that allows for newline characters and scrolling
@@ -93,10 +91,10 @@ class IFBlock(IFBase):
 
         if self.text != "":
             text = self.text
-            text_color = ColorScheme.text_color
+            text_color = ColorTheme.current_theme.text_color
         else:
             text = self.default_text
-            text_color = ColorScheme.dim_text_color
+            text_color = ColorTheme.current_theme.dim_text_color
 
         self.text_lines = []
         temp_lines = chunk_text.split_lines(text)
@@ -173,10 +171,10 @@ class IFBox(IFBase):
 
         if self.text != "":
             text = self.text
-            text_color = ColorScheme.text_color
+            text_color = ColorTheme.current_theme.text_color
         else:
             text = self.default_text
-            text_color = ColorScheme.dim_text_color
+            text_color = ColorTheme.current_theme.dim_text_color
 
         text_lines = chunk_text.chunk(text, max_length=self.max_length)
 
@@ -208,11 +206,11 @@ class DateInput:
             Globals.cursor_position = len(self.text)
 
         # Draw box
-        pyg.draw.rect(window, Colors.gray, (self.x, self.y, self.width, self.height), border_radius=5)
-        pyg.draw.rect(window, Colors.dark_gray, (self.x + 2, self.y + 2, self.width - 4, self.height - 4), border_radius=5)
+        pyg.draw.rect(window, ColorTheme.current_theme.field_background_color, (self.x, self.y, self.width, self.height), border_radius=5)
+        pyg.draw.rect(window, ColorTheme.current_theme.field_border_color, (self.x + 2, self.y + 2, self.width - 4, self.height - 4), border_radius=5)
         
         if self.text == "" and not self.active:
-            window.blit(Fonts.font_20.render("Date of Dream", True, Colors.lighter_gray), (self.x + 4, self.y + 4))
+            window.blit(Fonts.font_20.render("Date of Dream", True, ColorTheme.current_theme.dim_text_color), (self.x + 4, self.y + 4))
         
         else:
             # Draw deliminators
@@ -221,7 +219,7 @@ class DateInput:
             for section in split_format:
                 horizontal_position += Fonts.font_20.size(section)[0]
                 if split_format.index(section) != len(split_format) - 1:
-                    window.blit(Fonts.font_20.render("/", True, Colors.white), (horizontal_position, self.y + 4))
+                    window.blit(Fonts.font_20.render("/", True, ColorTheme.current_theme.text_color), (horizontal_position, self.y + 4))
                 horizontal_position += Fonts.font_20.size("/")[0]
 
             if self.active:
@@ -232,7 +230,7 @@ class DateInput:
             for section in self.format.split("/"):
                 char_width = Fonts.font_20.size("A")[0]
                 date_portion = self.text[current_text_offset:current_text_offset + len(section)]
-                window.blit(Fonts.font_20.render(date_portion, True, Colors.white), (self.x + 4 + char_width * current_offset, self.y + 4))
+                window.blit(Fonts.font_20.render(date_portion, True, ColorTheme.current_theme.text_color), (self.x + 4 + char_width * current_offset, self.y + 4))
                 
                 if cursor_position >= len(section) - (1 if current_offset > 0 else 0):
                     cursor_offset += len(section) + 2
@@ -242,7 +240,8 @@ class DateInput:
 
                 # Draw cursor
                 if self.active and not cursor_position >= len(section) - (1 if current_offset > 0 else 0):
-                    pyg.draw.line(window, Colors.white, (self.x + 4 + char_width * (cursor_offset + cursor_position), self.y + 4), (self.x + 4 + char_width * (cursor_offset + cursor_position), self.y + self.height - 4))
+                    pyg.draw.line(window, ColorTheme.current_theme.text_color, (self.x + 4 + char_width * (cursor_offset + cursor_position), self.y + 4), (self.x + 4 + char_width * (cursor_offset + cursor_position), self.y + self.height - 4))
 
-    def check_mcollision(self):
-        return collider.collides_point(Globals.mouse_position, (self.x, self.y, self.width, self.height))
+    def check_mcollision(self, point: list=[0, 0]):
+        m = point if point != [0, 0] else Globals.mouse_position
+        return collider.collides_point(m, (self.x, self.y, self.width, self.height))

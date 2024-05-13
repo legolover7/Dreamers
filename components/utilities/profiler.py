@@ -32,9 +32,12 @@ class Profiler:
         except ZeroDivisionError:
             return self.framerate
     
-    def draw(self, window):
+    def draw(self, window: pyg.Surface, color=0):
         if not self.display:
             return
+
+        if color == 0:
+            color = self.text_color
         
         fps = (int(self.calc_framerate()) if self.precision == 0 else round(self.calc_framerate(), self.precision))
-        window.blit(self.font.render(str(fps), True, self.text_color), (self.x, self.y))
+        window.blit(self.font.render(str(fps), True, color), (self.x, self.y))

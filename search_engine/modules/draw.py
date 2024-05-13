@@ -1,8 +1,7 @@
-import contextlib
-with contextlib.redirect_stdout(None):
-    import pygame as pyg
+import pygame as pyg
+import copy
 
-from common.classes.display import Colors
+from common.classes.display import Colors, ColorTheme
 from common.classes.globals import Globals
 
 from components.tab_control.tab_components import TabBar
@@ -12,24 +11,21 @@ import common.modules.collider as collider
 
 def draw(search_view: ResultsView, tab_view: TabContainer, tab_bar: TabBar, profiler):
     VID_BUFFER = Globals.VID_BUFFER
-    WIDTH, HEIGHT = Globals.WIDTH, Globals.HEIGHT
 
-    VID_BUFFER.fill(Colors.black)
+    VID_BUFFER.fill(ColorTheme.current_theme.background_color)
 
     tab_bar.draw(VID_BUFFER, (0, 0))
     search_view.draw(VID_BUFFER, (50, 0))
-    tab_view.draw(VID_BUFFER, (Globals.WIDTH/2+50, 0))
+    
+    tab_view.draw(VID_BUFFER, Globals.mouse_position)
 
-    for tab in tab_view.tabs:
-        tab.draw(VID_BUFFER)
+    profiler.draw(VID_BUFFER, ColorTheme.current_theme.text_color)
 
-    profiler.draw(VID_BUFFER)
-
+    # Close button
     if collider.collides_point_circle(Globals.mouse_position, (Globals.WIDTH - 19, 15), 12):
-        pyg.draw.circle(VID_BUFFER, Colors.gray, (Globals.WIDTH - 19, 15), 12)
-
-    pyg.draw.line(VID_BUFFER, Colors.white, (Globals.WIDTH - 24, 10), (Globals.WIDTH - 14, 20))
-    pyg.draw.line(VID_BUFFER, Colors.white, (Globals.WIDTH - 14, 10), (Globals.WIDTH - 24, 20))
+        pyg.draw.circle(VID_BUFFER, ColorTheme.current_theme.field_background_color, (Globals.WIDTH - 19, 15), 12)
+    pyg.draw.line(VID_BUFFER, ColorTheme.current_theme.cursor_color, (Globals.WIDTH - 24, 10), (Globals.WIDTH - 14, 20))
+    pyg.draw.line(VID_BUFFER, ColorTheme.current_theme.cursor_color, (Globals.WIDTH - 14, 10), (Globals.WIDTH - 24, 20))
 
     # Draw window
     Globals.WINDOW.blit(pyg.transform.scale(VID_BUFFER, (Globals.WINDOW_WIDTH, Globals.WINDOW_HEIGHT)), (0, 0))

@@ -7,3 +7,4 @@
 # Files
 /setup.py
 /control_script.spec
+/components/utilities/fun.py

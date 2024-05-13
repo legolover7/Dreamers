@@ -4,7 +4,7 @@ with contextlib.redirect_stdout(None):
 import json
 import os
 
-from common.classes.display import Colors, Fonts
+from common.classes.display import Colors, ColorTheme, Fonts
 from common.classes.globals import Globals
 from search_engine.classes.results import Result
 from search_engine.modules.save_handler import FilePaths
@@ -26,8 +26,8 @@ class ResultsView:
         x, y = offset
         width, height = Globals.WIDTH/2, Globals.HEIGHT
 
-        pyg.draw.rect(window, Colors.dark_black, (x, y, width, height), border_radius=8)
-        pyg.draw.rect(window, Colors.black, (x+2, y+2, width-4, height-4), border_radius=8)
+        pyg.draw.rect(window, ColorTheme.current_theme.field_background_color, (x, y, width, height), border_radius=8)
+        pyg.draw.rect(window, ColorTheme.current_theme.background_color, (x+2, y+2, width-4, height-4), border_radius=8)
 
         vertical_offset = 0
         for result in self.search_results:
@@ -35,7 +35,7 @@ class ResultsView:
 
         if len(self.search_results) == 0:
             text_width = Fonts.font_30.size("No search results found")[0]
-            window.blit(Fonts.font_30.render("No search results found", True, Colors.light_gray), (x + (width - text_width)/2, y + 10))
+            window.blit(Fonts.font_30.render("No search results found", True, ColorTheme.current_theme.dim_text_color), (x + (width - text_width)/2, y + 10))
 
     def get_search(self, keyword):
         """Returns a Result containing the data of the supplied keyword"""
